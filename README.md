@@ -346,16 +346,17 @@ Steps 3 and 4 can be repeated independently without going through `createmaster`
 ---
 
 ## Requirements
-
 | Dependency | Used by | Notes |
 |------------|---------|-------|
 | `bash` ≥ 4.0 | all | Associative arrays require Bash 4+ |
 | `dialog` | createmaster | TUI menus |
-| `penguins-eggs` | createiso | ISO generation engine |
+| `penguins-eggs` or `eggs` | createiso | ISO generation engine — download at [repo.quirinux.org](https://repo.quirinux.org/pool/main/p/penguins-eggs/) |
+| `eggs-quirinux-config` | createiso | Quirinux-specific eggs configuration (recommended) — download at [repo.quirinux.org](https://repo.quirinux.org/pool/main/e/eggs-quirinux-config/) |
 | `xorriso` | recomp | ISO inspection and rebuild |
 | `squashfs-tools` (`unsquashfs`, `mksquashfs`) | recomp | squashfs pack/unpack |
 | `coreutils` (`dd`, `df`, `du`, `md5sum`) | recomp, cleanmaster | Standard utilities |
 | `apt-get` / `dnf` / `pacman` / `zypper` | cleanmaster, functions | Package management (one required) |
+
 
 ---
 
