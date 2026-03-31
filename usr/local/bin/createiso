@@ -46,11 +46,11 @@ fi
 # ----------------------------------------------------------------------
 # Variables
 # ----------------------------------------------------------------------
-	
-source "/opt/createmaster/var_distro" # Distribution variables
+
+source "/opt/createmaster/var_distro"          # Distribution variables
 source "/opt/createmaster/lang/lang_createiso" # Translations
-source "/opt/createmaster/functions" # Global functions
-	
+source "/opt/createmaster/functions"           # Global functions
+
 FILE_QML="$DISTRO_PATH/.wardrobe/vendors/$DISTRO_NAME/theme/calamares/branding/show.qml"
 DESKTOP_DIR=$(xdg-user-dir DESKTOP 2>/dev/null || echo "$HOME/Desktop") # User desktop path (locale-independent)
 
@@ -62,7 +62,7 @@ function _rev() {
 
     local CURRENT_REV=0
 
-    if grep -q "Rev\." "$FILE_QML"; then
+    if [[ -f "$FILE_QML" ]] && grep -q "Rev\." "$FILE_QML"; then
         CURRENT_REV=$(grep -oP 'Rev\. \d+' "$FILE_QML" | head -n1 | awk '{print $2}')
         [[ "$CURRENT_REV" =~ ^[0-9]+$ ]] || CURRENT_REV=0
     fi
@@ -188,12 +188,12 @@ function _isoname() {
 
 # ----------------------------------------------------------------------
 
-function _md5sum() {	
-	
+function _md5sum() {
+
     [[ "$TEST_MODE" -eq 1 ]] && return
 
     ISO_BASE="${ISO_NAME%.iso}"
-    if [ -e "$DESKTOP_DIR/$ISO_NAME" ]; then  
+    if [ -e "$DESKTOP_DIR/$ISO_NAME" ]; then
         cd "$DESKTOP_DIR" || exit 1
         md5sum "$ISO_NAME" > "${ISO_BASE}.md5"
     fi
@@ -202,7 +202,7 @@ function _md5sum() {
 # ----------------------------------------------------------------------
 
 function _bye() {
-	
+
     if [[ "$TEST_MODE" -eq 1 ]]; then
         echo
         echo "$(_msg TEST_END)"
@@ -215,21 +215,21 @@ function _bye() {
 }
 
 function _clean() {
-	
-	cleanmaster
-	
+
+    cleanmaster
+
 }
 
 # ======================================================================
 # Function execution
 # ======================================================================
-_rootcheck		# Ensures the script is run as root
-_internet		# Checks for active internet connection
-_clean			# Cleans up the work environment before starting
-_rev			# Prompts for and sets the revision number
-_calamares		# Updates version info in the Calamares installer files
-_eggsyaml		# Updates eggs.yaml with the latest kernel version
-_createiso		# Runs eggs produce to generate the ISO image
-_isoname		# Renames the generated ISO file with the distro naming convention
-_md5sum			# Generates the MD5 checksum file for the ISO
-_bye			# Displays the final success message		
+_rootcheck    # Ensures the script is run as root
+_internet     # Checks for active internet connection
+_clean        # Cleans up the work environment before starting
+_rev          # Prompts for and sets the revision number
+_calamares    # Updates version info in the Calamares installer files
+_eggsyaml     # Updates eggs.yaml with the latest kernel version
+_createiso    # Runs eggs produce to generate the ISO image
+_isoname      # Renames the generated ISO file with the distro naming convention
+_md5sum       # Generates the MD5 checksum file for the ISO
+_bye          # Displays the final success message
