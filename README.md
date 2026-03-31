@@ -20,6 +20,7 @@ It was originally developed for [Quirinux](https://www.quirinux.org), a Devuan-b
   - [var\_distro](#var_distro)
   - [Language system](#language-system)
   - [Modules](#modules)
+- [Adapting to other distributions](#adapting-to-other-distributions)
 - [Typical Workflow](#typical-workflow)
 - [Requirements](#requirements)
 - [License](#license)
@@ -272,7 +273,7 @@ Instead of hardcoding a temp path, `recomp` inspects all mounted real filesystem
 | `_update` | Detects `apt-get`, `dnf` or `yum` and runs a system update |
 | `_depends` | Installs base packages (`wget`, `git`, `dialog`, etc.) and any additional `.deb`/`.rpm` packages listed in `$DISTRO_DEPENDS_LOCATION`; creates a marker file when done |
 | `_lang` | Generates and activates the required system locales; creates a marker file when done |
-| `_verif_path` | Confirms the script is running on the expected master system path (`$DISTRO_PATH`) |
+| `_verif_path` | Confirms the script is running on the expected master system path (`$DISTRO_PATH`); can be disabled via `DISTRO_VERIF_PATH="no"` in `var_distro` |
 | `_quit` | Clears the screen and exits cleanly |
 
 The file also sources `/opt/createmaster/var_distro` to make the distribution variables available to every consumer.
@@ -290,6 +291,13 @@ The file also sources `/opt/createmaster/var_distro` to make the distribution va
 | `DISTRO_PATH` | `/home/user/quirinux` | Path to the master distribution's working tree |
 | `DISTRO_SPLASH` | `"…"` | ASCII art shown on the createmaster welcome screen |
 | `DISTRO_DEPENDS_LOCATION` | `(…)` | Array of local or remote paths where extra `.deb`/`.rpm` packages are fetched from |
+
+The following variables are **optional** and have built-in defaults:
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `DISTRO_LANG_DEFAULT` | `es_ES.UTF-8` | Default system locale activated after generating all supported locales |
+| `DISTRO_VERIF_PATH` | `yes` | Set to `"no"` to skip the master-path check in `_verif_path`; useful when the derivative does not use a dedicated user directory as an environment indicator |
 
 ### Language system
 
@@ -316,6 +324,34 @@ MOD_MENU="Screen ruler (KRuler)"
 ```
 
 `createmaster` discovers modules dynamically by searching all subdirectories, so the category folder structure is purely organisational — it has no effect on how modules are loaded. To add a new piece of software to the distribution, create a new module file and add its name to the appropriate array (`ESTANDAR_MODS` or `ESPECIFIC_MODS`) in `createmaster`.
+
+---
+
+## Adapting to other distributions
+
+CreateMaster was built for Quirinux but is designed to be reused. The `var_distro` file is the single place where all distribution-specific identity is defined. To build a different derivative, edit that file and leave every other script untouched.
+
+Two optional variables control behaviour that is Quirinux-specific by default:
+
+**`DISTRO_VERIF_PATH`**
+
+By default `_verif_path` checks that `$DISTRO_PATH` exists on disk before allowing any operation. This prevents accidentally running createmaster on a regular workstation instead of the dedicated master machine. If your setup does not use a dedicated user directory as an environment indicator, disable the check:
+
+```bash
+DISTRO_VERIF_PATH="no"
+```
+
+When set to `"no"`, `_verif_path` returns immediately without any check. When omitted or set to any other value, the check is enforced.
+
+**`DISTRO_LANG_DEFAULT`**
+
+`_lang` always generates locales for `en_US`, `fr_FR`, `de_DE`, `it_IT`, `gl_ES` and `pt_PT`. The locale that is subsequently set as the system default is `es_ES.UTF-8` unless you override it:
+
+```bash
+DISTRO_LANG_DEFAULT="pt_PT.UTF-8"
+```
+
+Any locale string accepted by `locale-gen` is valid here.
 
 ---
 

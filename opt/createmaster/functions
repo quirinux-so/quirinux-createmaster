@@ -6,7 +6,7 @@
 # Author:        Charlie Martínez® <cmartinez@quirinux.org>
 # License:       https://www.gnu.org/licenses/gpl-2.0.txt
 # Purpose:       Function collection
-# Distribution:  Quirinux 2.x
+# Distribution:  Quirinux 2.x / Multi-distro
 # ======================================================================
 
 #
@@ -53,7 +53,7 @@ function _internet() {
 
 	if ! ping -c 1 google.com &> /dev/null; then
 		echo "ERROR: Este programa require conexión a internet."
-		xit 1
+		exit 1   # BUG CORREGIDO: era "xit 1"
 	fi        
 }
 
@@ -159,47 +159,81 @@ function _depends() {
 
 function _lang() {	
 	
-	# Default language
+	# Generate and activate the system locales required by createmaster.
+	# Creates a marker file at /opt/createmaster/verif/ok-lang on success
+	# so that locale generation is only performed once.
+	#
+	# The default system locale is es_ES.UTF-8 unless overridden in
+	# /opt/createmaster/var_distro with:
+	#
+	#   DISTRO_LANG_DEFAULT="pt_PT.UTF-8"   # or any other supported locale
+	#
+	# Locales always generated regardless of the default:
+	#   en_US, fr_FR, de_DE, it_IT, gl_ES, pt_PT
+	# Plus whichever locale DISTRO_LANG_DEFAULT resolves to.
 
-    LANG_PREDET="es_ES.UTF-8" 
+	# Default language
+	# MULTI-DISTRO: can be overridden in var_distro with DISTRO_LANG_DEFAULT
+
+    LANG_PREDET="${DISTRO_LANG_DEFAULT:-es_ES.UTF-8}"
     
 	# Verify language marker
 	
 	if [ ! -e /opt/createmaster/verif/ok-lang ]; then
-		
-	if [ ! -e /usr/share/locale/locale.alias ]; then
-	touch /usr/share/locale/locale.alias
+
+		# BUG CORREGIDO: se crea el directorio antes de intentar escribir el marcador
+		mkdir -p /opt/createmaster/verif/
+	
+		if [ ! -e /usr/share/locale/locale.alias ]; then
+			touch /usr/share/locale/locale.alias
+		fi
+    
+		idiomas=("en_US.UTF-8" "fr_FR.UTF-8" "de_DE.UTF-8" "it_IT.UTF-8" "gl_ES.UTF-8" "pt_PT.UTF-8" "${LANG_PREDET}")
+
+		# Configure languages
+		# BUG CORREGIDO: locale -a devuelve formato "es_ES.utf8" (minúsculas, sin guion),
+		# por eso el grep nunca hacía match y se regeneraban los locales siempre.
+		# Ahora se normaliza el nombre para comparar correctamente con la salida de locale -a.
+
+		for idioma in "${idiomas[@]}"; do
+			idioma_normalizado=$(echo "$idioma" | tr '[:upper:]' '[:lower:]' | sed 's/\.utf-8/.utf8/')
+			if ! locale -a | grep -qi "^${idioma_normalizado}$"; then
+				locale-gen "$idioma"
+				echo "Configuración de $idioma completa."
+			fi
+		done
+    
+		# Set the default language
+
+		update-locale LANG="${LANG_PREDET}"
+    
+		touch /opt/createmaster/verif/ok-lang
+    
 	fi
-    
-    idiomas=("en_US.UTF-8" "fr_FR.UTF-8" "de_DE.UTF-8" "it_IT.UTF-8" "gl_ES.UTF-8" "pt_PT.UTF-8" "${LANG_PREDET}" )
-
-	# Configure languages
-
-    for idioma in "${idiomas[@]}"; do
-        
-		# Check if the configuration already exists
-        
-        if ! locale -a | grep -q "$idioma"; then
-            sudo locale-gen $idioma
-            echo "Configuración de $idioma completa."
-        fi
-        if [ "$idioma" == "${LANG_PREDET}" ]; then
-            break 
-        fi
-    done
-    
-	# Set the default language
-
-    update-locale LANG="${LANG_PREDET}"
-    
-    touch /opt/createmaster/verif/ok-lang
-    
-    fi
 }
 
 function _verif_path() {
 
 	# Check if the script is being used on a master distro.
+	#
+	# By default this function checks that the directory defined in DISTRO_PATH
+	# exists. This acts as a safeguard to prevent running createmaster on a
+	# regular user machine instead of the dedicated master system.
+	#
+	# MULTI-DISTRO USAGE:
+	# If your derivative does not use a dedicated user directory as the master
+	# environment indicator, you can disable this check by adding the following
+	# line to /opt/createmaster/var_distro:
+	#
+	#   DISTRO_VERIF_PATH="no"
+	#
+	# When set to "no", _verif_path returns immediately without any check,
+	# allowing createmaster to run on any machine regardless of DISTRO_PATH.
+	# When omitted or set to any other value, the check is enforced (default).
+
+	if [[ "${DISTRO_VERIF_PATH:-yes}" == "no" ]]; then
+		return 0
+	fi
 
     if [ ! -d "$DISTRO_PATH" ]; then
         echo "ERROR: Comando exclusivo para ser utilizado en ${DISTRO_NAME^} Master."
