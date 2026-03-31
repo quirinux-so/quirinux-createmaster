@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# =================================================================
+# File:        xorg_mod
+# Author:      Charlie Martínez® <cmartinez@quirinux.org>
+# License:     https://www.gnu.org/licenses/gpl-2.0.txt
+# Purpose:     Variable module for package installation
+# Distro:      Quirinux 2.x
+# =================================================================
+
+# Copyright (c) 2019-2025 Charlie Martínez. All Rights Reserved.  
+# License: https://www.gnu.org/licenses/gpl-2.0.txt  
+# Authorized and unauthorized uses of the Quirinux trademark:  
+# See https://www.quirinux.org/aviso-legal  
+#
+
+# This variable module was created for Quirinux 2.0 and contains  
+# necessary information for installing or uninstalling packages through
+# "createmaster" program, which is used to build the master distribution.
+
+#-----------------------------------------------------------------------
+
+# MOD_NAME = Module name.
+# MOD_PACKS = List of packages required by this module, separated by spaces.
+# MOD_MEU =  Menu entry description for this module.
+
+MOD_NAME="xorg_mod"
+MOD_PACKS="i965-va-driver xauth xinit xinput xkb-data xorg xserver-xephyr xserver-xorg xserver-xorg-core xserver-xorg-input-all xserver-xorg-input-libinput xserver-xorg-input-mutouch xserver-xorg-input-multitouch xserver-xorg-input-synaptics xserver-xorg-input-wacom xserver-xorg-input-kbd xserver-xorg-legacy xserver-xorg-video-all xserver-xorg-video-amdgpu xserver-xorg-video-ati xserver-xorg-video-fbdev xserver-xorg-video-intel xserver-xorg-video-nouveau xserver-xorg-video-qxl xserver-xorg-video-radeon xserver-xorg-video-vesa"
+MOD_MENU="Servidor de video (xorg)"

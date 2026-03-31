@@ -1,0 +1,454 @@
+#!/bin/bash
+
+# ======================================================================
+# File:          recomp
+# Path:          /usr/local/bin/
+# Author:        Charlie Martínez® <cmartinez@quirinux.org>
+# License:       https://www.gnu.org/licenses/gpl-2.0.txt
+# Purpose:       Recompress a hybrid live ISO with xz + bcj x86
+# Distribution:  Quirinux 2.x
+# ======================================================================
+
+#
+# Copyright (c) 2019-2025 Charlie Martínez, all rights reserved.
+# License: https://www.gnu.org/licenses/gpl-2.0.txt
+# Authorized and unauthorized uses of the Quirinux trademark:
+# See https://www.quirinux.org/aviso-legal
+#
+
+# Usage: sudo ./recomp <file.iso>
+
+# ----------------------------------------------------------------------
+# Translations
+# ----------------------------------------------------------------------
+
+source "/opt/createmaster/lang/lang_recomp" # Translations
+source "/opt/createmaster/functions"        # Shared functions
+
+# ----------------------------------------------------------------------
+# Colors and output helpers
+# ----------------------------------------------------------------------
+
+RED='\033[0;31m'   GREEN='\033[0;32m'
+YELLOW='\033[1;33m' CYAN='\033[0;36m'
+BOLD='\033[1m'      NC='\033[0m'
+
+info()  { echo -e "${CYAN}[INFO]${NC}  $*"; }
+ok()    { echo -e "${GREEN}[OK]${NC}    $*"; }
+warn()  { echo -e "${YELLOW}[WARN]${NC}  $*"; }
+error() { echo -e "${RED}[ERROR]${NC} $*" >&2; }
+die()   { error "$*"; exit 1; }
+
+# ----------------------------------------------------------------------
+# Work directory — auto-select the disk with the most free space
+# ----------------------------------------------------------------------
+
+WORKBASE=""
+
+_detect_workbase() {
+    WORKBASE=$(df --output=avail,target -x tmpfs -x devtmpfs -x squashfs -x overlay \
+        | sort -rn | awk 'NR==2{print $2}')
+    [[ -z "$WORKBASE" || "$WORKBASE" == "/" ]] && WORKBASE="/var/tmp"
+    WORKBASE="${WORKBASE}/recomprimir-work"
+}
+
+# ----------------------------------------------------------------------
+# Preflight checks
+# ----------------------------------------------------------------------
+
+_preflight() {
+    _rootcheck
+
+    [[ $# -lt 1 ]] && {
+        echo -e "${BOLD}$(_msg USAGE)${NC} $0 <file.iso>"
+        exit 1
+    }
+
+    ISO_ORIGINAL="$(realpath "$1")"
+    [[ ! -f "$ISO_ORIGINAL" ]] && die "$(_msg ERR_FILE_NOT_FOUND) $ISO_ORIGINAL"
+    [[ "${ISO_ORIGINAL,,}" != *.iso ]] && die "$(_msg ERR_NOT_ISO)"
+
+    for cmd in xorriso unsquashfs mksquashfs mount umount dd chroot; do
+        command -v "$cmd" &>/dev/null \
+            || die "$(_msg ERR_MISSING_CMD) '$cmd'  →  apt install $cmd"
+    done
+}
+
+# ----------------------------------------------------------------------
+# Variables — depends on ISO_ORIGINAL set by _preflight
+# ----------------------------------------------------------------------
+
+_set_variables() {
+    ISO_BASENAME="$(basename "$ISO_ORIGINAL" .iso)"
+    ISO_DIR="$(dirname "$ISO_ORIGINAL")"
+    ISO_SALIDA="${ISO_DIR}/${ISO_BASENAME}-xz.iso"
+
+    [[ -z "$WORKBASE" ]] && _detect_workbase
+
+    WORKDIR="${WORKBASE}"
+    DIR_ISO="${WORKDIR}/iso"
+    DIR_SQUASHFS="${WORKDIR}/squashfs"
+    DIR_NEWISO="${WORKDIR}/newiso"
+    MBR_BIN="${WORKDIR}/mbr.bin"
+
+    # Check available space (we need ~3× the ISO size)
+    ISO_SIZE_KB=$(du -sk "${ISO_ORIGINAL}" | cut -f1)
+    ESPACIO_DISPONIBLE_KB=$(df -k "$(dirname "${WORKBASE}")" | awk 'NR==2{print $4}')
+    if [[ $ESPACIO_DISPONIBLE_KB -lt $(( ISO_SIZE_KB * 3 )) ]]; then
+        die "$(_msg ERR_SPACE) $(dirname "${WORKBASE}").
+  $(_msg ERR_SPACE_AVAIL) $(( ESPACIO_DISPONIBLE_KB / 1024 )) MB
+  $(_msg ERR_SPACE_NEEDED) ~$(( ISO_SIZE_KB * 3 / 1024 )) MB
+  $(_msg ERR_SPACE_HINT)"
+    fi
+}
+
+# ----------------------------------------------------------------------
+# Cleanup trap — runs only on error
+# ----------------------------------------------------------------------
+
+_cleanup() {
+    _unmount_chroot 2>/dev/null || true
+    mountpoint -q "${DIR_ISO}" 2>/dev/null && umount -lf "${DIR_ISO}" 2>/dev/null || true
+    [[ -f "${ISO_SALIDA}.tmp" ]] && rm -f "${ISO_SALIDA}.tmp" || true
+    [[ -d "${WORKDIR}" ]] && rm -rf "${WORKDIR}" || true
+}
+
+# ----------------------------------------------------------------------
+# Mount / unmount the chroot environment
+# ----------------------------------------------------------------------
+
+_mount_chroot() {
+    info "$(_msg CHROOT_MOUNTING) ${DIR_SQUASHFS}"
+
+    # Verify the squashfs root directory exists and has content
+    [[ ! -d "${DIR_SQUASHFS}" ]] \
+        && die "$(_msg ERR_SQUASHFS_DIR) ${DIR_SQUASHFS}"
+    [[ ! -d "${DIR_SQUASHFS}/usr" ]] \
+        && die "$(_msg ERR_SQUASHFS_EMPTY) ${DIR_SQUASHFS}"
+
+    # Detect the shell available inside the squashfs
+    CHROOT_SHELL=""
+    for sh in /bin/bash /usr/bin/bash /bin/sh /usr/bin/sh; do
+        [[ -f "${DIR_SQUASHFS}${sh}" ]] && { CHROOT_SHELL="$sh"; break; }
+    done
+    [[ -z "$CHROOT_SHELL" ]] \
+        && die "$(_msg ERR_NO_SHELL)"
+    info "$(_msg CHROOT_SHELL_FOUND) ${CHROOT_SHELL}"
+
+    # Bind-mount only if not already mounted (safe re-entry)
+    for punto in dev dev/pts proc sys run; do
+        mountpoint -q "${DIR_SQUASHFS}/${punto}" 2>/dev/null \
+            || mount --bind "/${punto}" "${DIR_SQUASHFS}/${punto}"
+    done
+
+    # X11 graphical support
+    if [[ -n "${DISPLAY:-}" && -d /tmp/.X11-unix ]]; then
+        mkdir -p "${DIR_SQUASHFS}/tmp/.X11-unix"
+        mountpoint -q "${DIR_SQUASHFS}/tmp/.X11-unix" 2>/dev/null \
+            || mount --bind /tmp/.X11-unix "${DIR_SQUASHFS}/tmp/.X11-unix"
+        xhost +local: &>/dev/null || true
+        info "$(_msg CHROOT_X11_OK) (DISPLAY=${DISPLAY})"
+    else
+        warn "$(_msg CHROOT_X11_WARN)"
+    fi
+
+    ok "$(_msg CHROOT_MOUNTED)"
+}
+
+_unmount_chroot() {
+    # Unmount bind-mounts in reverse order
+    for punto in run sys proc dev/pts dev; do
+        mountpoint -q "${DIR_SQUASHFS}/${punto}" 2>/dev/null \
+            && umount -lf "${DIR_SQUASHFS}/${punto}" 2>/dev/null || true
+    done
+    # Unmount X11 socket if it was mounted
+    mountpoint -q "${DIR_SQUASHFS}/tmp/.X11-unix" 2>/dev/null \
+        && umount -lf "${DIR_SQUASHFS}/tmp/.X11-unix" 2>/dev/null || true
+    # Unmount any residual mounts left inside the squashfs
+    # (gvfs, fuse, doc/by-app, etc.) — reverse order by path depth
+    grep "${DIR_SQUASHFS}" /proc/mounts 2>/dev/null \
+        | awk '{print $2}' \
+        | sort -r \
+        | while read -r punto_residual; do
+            umount -lf "${punto_residual}" 2>/dev/null || true
+        done
+}
+
+# ----------------------------------------------------------------------
+# Interactive menu
+# ----------------------------------------------------------------------
+
+_menu() {
+    while true; do
+        echo
+        echo -e "${BOLD}════════════════════════════════════════════════════════${NC}"
+        echo -e "${BOLD}$(_msg MENU_TITLE)${NC}"
+        echo -e "${BOLD}════════════════════════════════════════════════════════${NC}"
+        echo -e "${YELLOW}$(_msg MENU_WARN)${NC}"
+        echo -e "${BOLD}════════════════════════════════════════════════════════${NC}"
+        echo
+        echo -e "  ${BOLD}1)${NC} $(_msg MENU_OPT1)"
+        echo -e "  ${BOLD}2)${NC} $(_msg MENU_OPT2)"
+        echo -e "  ${BOLD}3)${NC} $(_msg MENU_OPT3)"
+        echo
+        read -r -p "$(_msg MENU_PROMPT) " OPCION </dev/tty
+
+        case "$OPCION" in
+
+            1)  # Enter chroot to edit the ISO
+                echo
+                echo -e "${BOLD}════════════════════════════════════════════════════════${NC}"
+                echo -e "$(_msg CHROOT_INTRO1)"
+                echo -e "$(_msg CHROOT_INTRO2)"
+                echo -e "$(_msg CHROOT_INTRO3)"
+                echo -e "$(_msg CHROOT_EXIT_HINT)"
+                echo -e "${BOLD}════════════════════════════════════════════════════════${NC}"
+                echo
+                _mount_chroot
+                echo
+                echo -e "${YELLOW}$(_msg CHROOT_PROMPT_WARN1)${NC}"
+                echo -e "${BOLD}  root@ISO-QUIRINUX:/#${NC}"
+                echo -e "${YELLOW}$(_msg CHROOT_PROMPT_WARN2)${NC}"
+                echo
+                # Launch chroot with a distinctive visual hostname and the detected shell.
+                # The user types 'exit' to return to the menu instead of propagating
+                # the signal and killing the script.
+                RCFILE_TMP="${DIR_SQUASHFS}/tmp/.chroot_rc_$$"
+                rm -f "${DIR_SQUASHFS}/tmp/.chroot_done_$$"
+                cat > "${RCFILE_TMP}" << RCEOF
+export PS1='\[\033[1;31m\]root@ISO-QUIRINUX\[\033[0m\]:\[\033[1;34m\]\w\[\033[0m\]# '
+[ -f /etc/bash.bashrc ] && source /etc/bash.bashrc 2>/dev/null || true
+[ -f ~/.bashrc ]        && source ~/.bashrc         2>/dev/null || true
+export PS1='\[\033[1;31m\]root@ISO-QUIRINUX\[\033[0m\]:\[\033[1;34m\]\w\[\033[0m\]# '
+echo ""
+echo "  $(_msg CHROOT_EXIT_HINT)"
+echo ""
+RCEOF
+                set +e
+                (
+                    chroot "${DIR_SQUASHFS}" \
+                        /usr/bin/env -i \
+                        HOME=/root \
+                        TERM="${TERM}" \
+                        DISPLAY="${DISPLAY:-:0}" \
+                        XAUTHORITY="${XAUTHORITY:-/root/.Xauthority}" \
+                        PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+                        "${CHROOT_SHELL}" --rcfile /tmp/.chroot_rc_$$
+                )
+                set -e
+                rm -f "${RCFILE_TMP}"
+                _unmount_chroot
+                echo
+                ok "$(_msg CHROOT_BACK)"
+                echo -e "$(_msg CHROOT_HOSTNAME) $(hostname)  $(_msg CHROOT_HOSTNAME_HINT)"
+                ;;
+
+            2)  # Proceed to recompression
+                _unmount_chroot
+                echo
+                ok "$(_msg RECOMPRESS_CONTINUE)"
+                return 0
+                ;;
+
+            3)  # Exit and clean up
+                echo
+                warn "$(_msg EXIT_CLEANING)"
+                _unmount_chroot
+                mountpoint -q "${DIR_ISO}" 2>/dev/null \
+                    && umount -lf "${DIR_ISO}" 2>/dev/null || true
+                rm -rf "${WORKDIR}"
+                ok "$(_msg EXIT_DELETED) ${WORKDIR}"
+                echo
+                info "$(_msg EXIT_CANCELLED)"
+                echo
+                exit 0
+                ;;
+
+            *)  # Invalid option
+                warn "$(_msg MENU_INVALID)"
+                ;;
+        esac
+    done
+}
+
+# ----------------------------------------------------------------------
+# Header
+# ----------------------------------------------------------------------
+
+_header() {
+    echo
+    echo -e "${BOLD}════════════════════════════════════════════════════════${NC}"
+    echo -e "${BOLD}$(_msg HEADER)${NC}"
+    echo -e "${BOLD}════════════════════════════════════════════════════════${NC}"
+    echo
+    info "$(_msg INFO_ISO_ORIGINAL) $ISO_ORIGINAL"
+    info "$(_msg INFO_ISO_OUTPUT)   $ISO_SALIDA"
+    info "$(_msg INFO_WORKDIR)      $WORKDIR"
+    info "$(_msg INFO_FREE_SPACE)   $(( ESPACIO_DISPONIBLE_KB / 1024 )) MB"
+    echo
+}
+
+# ----------------------------------------------------------------------
+# Step 1 — Preserve the hybrid MBR (first 432 bytes of the original ISO)
+# ----------------------------------------------------------------------
+
+_step1_mbr() {
+    info "$(_msg STEP1)"
+    mkdir -p "${WORKDIR}"
+    dd if="${ISO_ORIGINAL}" of="${MBR_BIN}" bs=1 count=432 status=none
+    ok "$(_msg STEP1_OK)"
+}
+
+# ----------------------------------------------------------------------
+# Step 2 — Mount the ISO and copy its structure
+# ----------------------------------------------------------------------
+
+_step2_copy() {
+    info "$(_msg STEP2)"
+    mkdir -p "${DIR_ISO}" "${DIR_SQUASHFS}" "${DIR_NEWISO}"
+    mount -o loop,ro "${ISO_ORIGINAL}" "${DIR_ISO}"
+    cp -a "${DIR_ISO}/." "${DIR_NEWISO}/"
+
+    SQUASHFS_RELPATH=$(find "${DIR_NEWISO}" -name "filesystem.squashfs" -printf '%P\n' | head -1)
+    [[ -z "$SQUASHFS_RELPATH" ]] && die "$(_msg ERR_NO_SQUASHFS)"
+    info "$(_msg SQUASHFS_FOUND) ${SQUASHFS_RELPATH}"
+
+    chmod -R u+w "${DIR_NEWISO}"
+    rm -f "${DIR_NEWISO}/${SQUASHFS_RELPATH}"
+    ok "$(_msg STEP2_OK)"
+}
+
+# ----------------------------------------------------------------------
+# Step 3 — Decompress the squashfs
+# ----------------------------------------------------------------------
+
+_step3_decompress() {
+    info "$(_msg STEP3)"
+    unsquashfs -xattrs -d "${DIR_SQUASHFS}" "${DIR_ISO}/${SQUASHFS_RELPATH}"
+    umount -lf "${DIR_ISO}"
+    ok "$(_msg STEP3_OK)"
+}
+
+# ----------------------------------------------------------------------
+# Step 4 — Recompress with xz + bcj x86
+# ----------------------------------------------------------------------
+
+_step4_compress() {
+    SQUASHFS_NUEVO="${DIR_NEWISO}/${SQUASHFS_RELPATH}"
+    mkdir -p "$(dirname "${SQUASHFS_NUEVO}")"
+
+    info "$(_msg STEP4)"
+    warn "$(_msg STEP4_WARN)"
+    echo
+
+    SECONDS=0
+    mksquashfs "${DIR_SQUASHFS}" "${SQUASHFS_NUEVO}" \
+        -comp xz -Xbcj x86 -b 1M -Xdict-size 1M \
+        -xattrs \
+        -no-progress -noappend
+
+    TIEMPO_COMP=$SECONDS
+    echo
+    ok "$(_msg STEP4_OK) $(( TIEMPO_COMP / 60 )) $(_msg STEP4_TIME) $(( TIEMPO_COMP % 60 )) seg"
+    info "$(_msg STEP4_SIZE) $(du -sh "${SQUASHFS_NUEVO}" | cut -f1)"
+}
+
+# ----------------------------------------------------------------------
+# Step 5 — Update metadata
+# ----------------------------------------------------------------------
+
+_step5_metadata() {
+    info "$(_msg STEP5)"
+
+    SIZE_FILE="$(dirname "${SQUASHFS_NUEVO}")/filesystem.size"
+    printf '%s' "$(du -sx --block-size=1 "${DIR_SQUASHFS}" | cut -f1)" > "${SIZE_FILE}"
+
+    if [[ -f "${DIR_NEWISO}/md5sum.txt" ]]; then
+        pushd "${DIR_NEWISO}" > /dev/null
+        find . -type f ! -name 'md5sum.txt' | sort | xargs md5sum > md5sum.txt
+        popd > /dev/null
+        ok "$(_msg STEP5_MD5_OK)"
+    fi
+    ok "$(_msg STEP5_OK)"
+}
+
+# ----------------------------------------------------------------------
+# Step 6 — Rebuild the hybrid ISO
+# ----------------------------------------------------------------------
+
+_step6_build() {
+    info "$(_msg STEP6)"
+
+    ISO_TMP="${ISO_SALIDA}.tmp"
+
+    VOLID=$(xorriso -indev "${ISO_ORIGINAL}" -report_system_area as_mkisofs 2>/dev/null \
+        | grep -- "-volid" | sed "s/.*-volid '\([^']*\)'.*/\1/" | head -1) || true
+    [[ -z "$VOLID" ]] && VOLID="QUIRINUX"
+    info "$(_msg STEP6_VOLID) ${VOLID}"
+
+    BOOT_PARAMS=$(xorriso -indev "${ISO_ORIGINAL}" \
+        -report_system_area as_mkisofs 2>/dev/null \
+        | grep -v "^$" | grep -v -- "-volid" \
+        | tr '\n' ' ')
+
+    cat > "${WORKDIR}/build_iso.sh" << BUILDSCRIPT
+#!/usr/bin/env bash
+xorriso -as mkisofs \\
+  -iso-level 3 \\
+  -full-iso9660-filenames \\
+  -volid '${VOLID}' \\
+  ${BOOT_PARAMS} \\
+  -output '${ISO_TMP}' \\
+  '${DIR_NEWISO}'
+BUILDSCRIPT
+    chmod +x "${WORKDIR}/build_iso.sh"
+    bash "${WORKDIR}/build_iso.sh"
+
+    [[ ! -f "${ISO_TMP}" ]] && die "$(_msg ERR_NO_ISO)"
+
+    info "$(_msg STEP6_MBR)"
+    dd if="${MBR_BIN}" of="${ISO_TMP}" bs=1 count=432 conv=notrunc status=none
+    ok "$(_msg STEP6_MBR_OK)"
+
+    mv "${ISO_TMP}" "${ISO_SALIDA}"
+}
+
+# ----------------------------------------------------------------------
+# Final cleanup and summary
+# ----------------------------------------------------------------------
+
+_summary() {
+    trap - ERR
+    info "$(_msg CLEANUP)"
+    rm -rf "${WORKDIR}"
+
+    echo
+    echo -e "${BOLD}════════════════════════════════════════════════════════${NC}"
+    echo -e "${BOLD}$(_msg SUMMARY_TITLE)${NC}"
+    echo -e "${BOLD}════════════════════════════════════════════════════════${NC}"
+    echo -e "$(_msg SUMMARY_ORIGINAL) ${YELLOW}$(du -sh "${ISO_ORIGINAL}" | cut -f1)${NC}  →  $(basename "${ISO_ORIGINAL}")"
+    echo -e "$(_msg SUMMARY_NEW)      ${GREEN}$(du -sh "${ISO_SALIDA}"   | cut -f1)${NC}  →  $(basename "${ISO_SALIDA}")"
+    echo -e "$(_msg SUMMARY_COMPRESS) ${BOLD}xz + bcj x86${NC}"
+    echo -e "$(_msg SUMMARY_TIME)     ${BOLD}$(( SECONDS / 60 )) min $(( SECONDS % 60 )) seg${NC}"
+    echo
+    ok "$(_msg DONE)"
+    echo
+}
+
+# ======================================================================
+# Function execution
+# ======================================================================
+
+_preflight "$@"         # Check root, arguments and required commands
+_detect_workbase        # Auto-select work directory with enough free space
+_set_variables          # Set all path and size variables
+trap _cleanup ERR       # Register error cleanup trap
+_header                 # Display run parameters
+_step1_mbr              # Preserve the hybrid MBR (432 bytes)
+_step2_copy             # Mount the ISO and copy its structure
+_step3_decompress       # Decompress the squashfs filesystem
+_menu                   # Interactive menu: edit (chroot), recompress or exit
+_step4_compress         # Recompress with xz + bcj x86
+_step5_metadata         # Update filesystem.size and md5sum.txt
+_step6_build            # Rebuild the hybrid ISO with xorriso
+_summary                # Clean up and print final report

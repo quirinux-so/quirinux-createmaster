@@ -1,0 +1,368 @@
+#!/bin/bash
+
+# ======================================================================
+# File:          lang_createmaster
+# Path:          /opt/createmaster/lang/
+# Author:        Charlie Martínez® <cmartinez@quirinux.org>
+# License:       https://www.gnu.org/licenses/gpl-2.0.txt
+# Purpose:       Createmaster translations
+# Distribution:  Quirinux 2.x
+# ======================================================================
+
+#
+# Copyright (c) 2019-2025 Charlie Martínez, all rights reserved.
+# Licencia: https://www.gnu.org/licenses/gpl-2.0.txt
+# Authorized and unauthorized uses of the Quirinux trademark:
+# See https://www.quirinux.org/aviso-legal
+#
+
+function _msg() {
+
+    local clave=$1
+    declare -A msg=(
+
+	[es_INSTALL_OF]="INSTALACIÓN DE"
+	[en_INSTALL_OF]="INSTALLATION OF"
+	[it_INSTALL_OF]="INSTALLAZIONE DI"
+	[de_INSTALL_OF]="INSTALLATION VON"
+	[fr_INSTALL_OF]="INSTALLATION DE"
+	[gl_INSTALL_OF]="INSTALACIÓN DE"
+	[pt_INSTALL_OF]="INSTALAÇÃO DO"
+
+	[es_HELP_TITLE]="AYUDA"
+	[en_HELP_TITLE]="HELP"
+	[it_HELP_TITLE]="AIUTO"
+	[de_HELP_TITLE]="HILFE"
+	[fr_HELP_TITLE]="AIDE"
+	[gl_HELP_TITLE]="AXUDA"
+	[pt_HELP_TITLE]="AJUDA"
+	
+	[es_HELP_OPTION]="Ayuda"
+	[en_HELP_OPTION]="Help"
+	[it_HELP_OPTION]="Aiuto"
+	[de_HELP_OPTION]="Hilfe"
+	[fr_HELP_OPTION]="Aide"
+	[gl_HELP_OPTION]="Axuda"
+	[pt_HELP_OPTION]="Ajuda"
+	
+	[es_CREATOR]="CREADOR"
+	[en_CREATOR]="CREATOR"
+	[it_CREATOR]="CREATORE"
+	[de_CREATOR]="ERSTELLER"
+	[fr_CREATOR]="CRÉATEUR"
+	[gl_CREATOR]="CREADOR"
+	[pt_CREATOR]="CRIADOR"
+	
+	[es_VERSION]="VERSIÓN:"
+	[en_VERSION]="VERSION"
+	[it_VERSION]="VERSIONE"
+	[de_VERSION]="VERSION"
+	[fr_VERSION]="VERSION"
+	[gl_VERSION]="VERSIÓN"
+	[pt_VERSION]="VERSÃO"
+	
+    [es_WARNING]="
+ --------------------------------------------------------------------
+ | A continuación se instalarán algunos programas que el instalador |
+ | necesita para funcionar, procedimiento 100% seguro.              |
+ --------------------------------------------------------------------
+"
+    [en_WARNING]='
+ --------------------------------------------------------------------
+ | The installer will now install some programs it needs to work,   |
+ | a 100% safe procedure.                                           |
+ --------------------------------------------------------------------
+ '    
+    [it_WARNING]='
+ --------------------------------------------------------------------
+ | Il programma di installazione installerà ora alcuni programmi   |
+ | necessari per il suo funzionamento, procedura sicura al 100%.   |
+ --------------------------------------------------------------------
+ '    
+    [de_WARNING]='
+ -------------------------------------------------------------------
+ | Der Installer wird nun einige Programme installieren, die er    |
+ | zum Funktionieren benötigt. 100 % sicheres Verfahren.           |
+ -------------------------------------------------------------------'
+    
+    [fr_WARNING]="
+ ------------------------------------------------------------------
+ | Le programme d'installation va maintenant installer certains   |
+ | programmes nécessaires à son fonctionnement, procédure 100%    |
+ | sécurisée.                                                     |
+ ------------------------------------------------------------------
+ " 
+    [gl_WARNING]='
+ --------------------------------------------------------------------
+ | A continuación instalaranse algúns programas que o instalador    |
+ | necesita para funcionar, procedemento 100% seguro.               |
+ --------------------------------------------------------------------
+ ' 
+    [pt_WARNING]='
+ --------------------------------------------------------------------
+ | Agora, o instalador instalará alguns programas necessários para  |
+ | o funcionamento, procedimento 100% seguro.                       |
+ --------------------------------------------------------------------
+ '
+ 	[es_CONTINUE]="Continuar"
+	[en_CONTINUE]="Continue"
+	[it_CONTINUE]="Continua"
+	[de_CONTINUE]="Fortfahren"
+	[fr_CONTINUE]="Continuer"
+	[gl_CONTINUE]="Continuar"
+	[pt_CONTINUE]="Continuar"
+	
+	[es_EXIT]="Salir"
+	[en_EXIT]="Exit"
+	[it_EXIT]="Esci"
+	[de_EXIT]="Beenden"
+	[fr_EXIT]="Quitter"
+	[gl_EXIT]="Saír"
+	[pt_EXIT]="Sair"
+	
+	[es_ANSWER]="Tu respuesta->"
+	[en_ANSWER]="Your answer->"
+	[it_ANSWER]="La tua risposta->"
+	[de_ANSWER]="Ihre Antwort->"
+	[fr_ANSWER]="Votre réponse->"
+	[gl_ANSWER]="A túa resposta->"
+	[pt_ANSWER]="Sua resposta->"
+	
+	[es_ERROR]="ERROR: Opción inválida. Debe ingresar 1 ó 0."
+	[en_ERROR]="ERROR: Invalid option. You must enter 1 or 0."
+	[it_ERROR]="ERRORE: Opzione non valida. Devi inserire 1 o 0."
+	[de_ERROR]="FEHLER: Ungültige Option. Sie müssen 1 oder 0 eingeben."
+	[fr_ERROR]="ERREUR : Option invalide. Vous devez entrer 1 ou 0."
+	[gl_ERROR]="ERRO: Opción non válida. Debes ingresar 1 ou 0."
+	[pt_ERROR]="ERRO: Opção inválida. Você deve inserir 1 ou 0."
+	
+	[es_CONGRATULATIONS]="ENORABUENA"
+	[en_CONGRATULATIONS]="CONGRATULATIONS"
+	[it_CONGRATULATIONS]="COMPLIMENTI"
+	[de_CONGRATULATIONS]="GLÜCKWUNSCH"
+	[fr_CONGRATULATIONS]="FÉLICITATIONS"
+	[gl_CONGRATULATIONS]="ENORABOA"
+	[pt_CONGRATULATIONS]="PARABÉNS"
+	
+	[es_ALL_STANDAR]="\n Todos los programas estándar que hacen a la base de la distribución\nse encuentran instalados en el sistema."
+	[en_ALL_STANDAR]="\n All standard programs that make up the base of the distribution\nare installed on the system."
+	[it_ALL_STANDAR]="\n Tutti i programmi standard che costituiscono la base della distribuzione\nsono installati nel sistema."
+	[de_ALL_STANDAR]="\n Alle Standardprogramme, die die Basis der Distribution bilden,\nsind im System installiert."
+	[fr_ALL_STANDAR]="\n Tous les programmes standards qui constituent la base de la distribution\nsont installés sur le système."
+	[gl_ALL_STANDAR]="\n Todos os programas estándar que forman a base da distribución\natópase instalados no sistema."
+	[pt_ALL_STANDAR]="\n Todos os programas padrão que compõem a base da distribuição\nestão instalados no sistema."
+ 
+ 	[es_ALL_SPECIFIC]="\n Todos los programas específicos de ${DISTRO_NAME^}\nse encuentran instalados en el sistema."
+	[en_ALL_SPECIFIC]="\n All specific programs of ${DISTRO_NAME^}\nare installed on the system."
+	[it_ALL_SPECIFIC]="\n Tutti i programmi specifici di ${DISTRO_NAME^}\nsono installati nel sistema."
+	[de_ALL_SPECIFIC]="\n Alle spezifischen Programme von ${DISTRO_NAME^}\nsind im System installiert"
+	[fr_ALL_SPECIFIC]="\n Tous les programmes spécifiques de ${DISTRO_NAME^}\nsont installés sur le système."
+	[gl_ALL_SPECIFIC]="\n Todos os programas específicos de ${DISTRO_NAME^}\natópanse instalados no sistema."
+	[pt_ALL_SPECIFIC]="\n Todos os programas específicos de ${DISTRO_NAME^}\nestão instalados no sistema."
+	
+	[es_ALL_PROGRAMS]="\n Todos los programas estandar y específicos de ${DISTRO_NAME^}\nse encuentran instalados en el sistema."
+	[en_ALL_PROGRAMS]="\n All standard and specific programs of ${DISTRO_NAME^}\nare installed on the system."
+	[it_ALL_PROGRAMS]="\n Tutti i programmi standard e specifici di ${DISTRO_NAME^}\nsono installati nel sistema."
+	[de_ALL_PROGRAMS]="\n Alle Standard- und spezifischen Programme von ${DISTRO_NAME^}\nsind im System installiert."
+	[fr_ALL_PROGRAMS]="\n Tous les programmes standards et spécifiques de ${DISTRO_NAME^}\nsont installés sur le système."
+	[gl_ALL_PROGRAMS]="\n Todos os programas estándar e específicos de ${DISTRO_NAME^}\natópanse instalados no sistema."
+	[pt_ALL_PROGRAMS]="\n Todos os programas padrão e específicos de ${DISTRO_NAME^}\nestão instalados no sistema."
+	
+	[es_STANDAR_PROGRAMS]="PROGRAMAS ESTANDAR"
+	[en_STANDAR_PROGRAMS]="STANDARD PROGRAMS"
+	[it_STANDAR_PROGRAMS]="PROGRAMMI STANDARD"
+	[de_STANDAR_PROGRAMS]="STANDARDPROGRAMME"
+	[fr_STANDAR_PROGRAMS]="PROGRAMMES STANDARDS"
+	[gl_STANDAR_PROGRAMS]="PROGRAMAS ESTÁNDARES"
+	[pt_STANDAR_PROGRAMS]="PROGRAMAS PADRÃO"
+	
+	[es_STANDAR_INSTALL]="\n Se procede a instalar los programas estandar"
+	[en_STANDAR_INSTALL]="\n Proceeding to install standard programs."
+	[it_STANDAR_INSTALL]="\n Installazione dei programmi standard in corso."
+	[de_STANDAR_INSTALL]="\n Standardprogramme werden installiert."
+	[fr_STANDAR_INSTALL]="\n Installation des programmes standards en cours."
+	[gl_STANDAR_INSTALL]="\n Procederase a instalar os programas estándar."
+	[pt_STANDAR_INSTALL]="\n Procedendo com a instalação dos programas padrão."
+	
+	[es_SPECIFIC_PROGRAMS]="PROGRAMAS ESPECÍFICOS "
+	[en_SPECIFIC_PROGRAMS]="SPECIFIC PROGRAMS "
+	[it_SPECIFIC_PROGRAMS]="PROGRAMMI SPECIFICI "
+	[de_SPECIFIC_PROGRAMS]="SPEZIFISCHE PROGRAMME"
+	[fr_SPECIFIC_PROGRAMS]="PROGRAMMES SPÉCIFIQUES "
+	[gl_SPECIFIC_PROGRAMS]="PROGRAMAS ESPECÍFICOS "
+	[pt_SPECIFIC_PROGRAMS]="PROGRAMAS ESPECÍFICOS "
+	
+	[es_SPECIFIC_INSTALL]="\n Se procede a instalar los programas específicos. "
+	[en_SPECIFIC_INSTALL]="\n Proceeding to install specific programs. "
+	[it_SPECIFIC_INSTALL]="\n Installazione dei programmi specifici in corso. "
+	[de_SPECIFIC_INSTALL]="\n Spezifische Programme werden installiert."
+	[fr_SPECIFIC_INSTALL]="\n Installation des programmes spécifiques en cours. "
+	[gl_SPECIFIC_INSTALL]="\n Procederase a instalar os programas específicos. "
+	[pt_SPECIFIC_INSTALL]="\n Procedendo com a instalação dos programas específicos. "
+ 
+	[es_HELP_TEXT]="Este programa sirve para crear un Master de ${DISTRO_NAME^} sobre ${DISTRO_PARENT^} ${DISTRO_DESKTOP^}\napto para ser redistribuido como iso derivada.\n\n\
+	*REMOVER PAQUETES QUE ${DISTRO_NAME^^} NO INCLUYE:\nSi existen paquetes en la distro madre que la derivada no debe incluir,\nesta opción se encarga de eliminarlos.\n\n\
+	*INSTALAR COLECCIÓN DE PROGRAMAS ESTÁNDAR:\nHerramientas básicas habituales que sirven como base para toda distro derivada.\n\n\
+	*INSTALAR COLECCIÓN DE PROGRAMAS ESPECÍFICOS:\nProgramas que configuran la especialización de la distro derivada.\nSirven para tareas concretas y no suelen venir preinstalados en distros de uso general.\n\n\
+	*INSTALAR PROGRAMAS ESTÁNDAR SUELTOS:\nPermite seleccionar qué programas instalar dentro del catálogo de componentes Estándar.\n\n\
+	*INSTALAR PROGRAMAS ESPECÍFICOS SUELTOS:\nPermite seleccionar qué programas instalar dentro del catálogo de componentes\nespecíficos que particularizan a la distro ${DISTRO_NAME^}.\n\n\
+	*INSTALACIÓN COMPLETA SIN REMOVER COMPONENTES:\nInstala todos los componentes (estándar y específicos) aunque no quita\naquellos componentes de ${DISTRO_PARENT^} que son excluidos en la iso oficial de ${DISTRO_NAME^}.\n\n\
+	*INSTALACIÓN COMPLETA (${DISTRO_NAME^^}):\nGenera una distro ${DISTRO_NAME^} idéntica a la que se distribuye de manera oficial."
+
+	[en_HELP_TEXT]="This program is used to create a Master of ${DISTRO_NAME^} on ${DISTRO_PARENT^} ${DISTRO_DESKTOP^},\nsuitable for redistribution as a derived ISO.\n\n\
+	*REMOVE PACKAGES NOT INCLUDED IN ${DISTRO_NAME^^}:\nIf there are packages in the parent distro that the derivative should not include,\nthis option removes them.\n\n\
+	*INSTALL STANDARD SOFTWARE COLLECTION:\nBasic common tools that serve as a foundation for any derived distro.\n\n\
+	*INSTALL SPECIFIC SOFTWARE COLLECTION:\nPrograms that define the specialization of the derived distro.\nThey serve specific tasks and are not usually preinstalled in general-use distros.\n\n\
+	*INSTALL INDIVIDUAL STANDARD PROGRAMS:\nAllows selecting which programs to install from the Standard components catalog.\n\n\
+	*INSTALL INDIVIDUAL SPECIFIC PROGRAMS:\nAllows selecting which programs to install from the catalog of\nspecific components that define ${DISTRO_NAME^}.\n\n\
+	*FULL INSTALLATION WITHOUT REMOVING COMPONENTS:\nInstalls all components (standard and specific) but does not remove\nthose from ${DISTRO_PARENT^} that are excluded in the official ${DISTRO_NAME^} ISO.\n\n\
+	*FULL INSTALLATION (${DISTRO_NAME^^}):\nGenerates a ${DISTRO_NAME^} distro identical to the officially distributed version."
+
+	[it_HELP_TEXT]="Questo programma serve per creare un Master di ${DISTRO_NAME^} su ${DISTRO_PARENT^} ${DISTRO_DESKTOP^},\nadatto per essere redistribuito come una ISO derivata.\n\n\
+	*RIMUOVERE I PACCHETTI NON INCLUSI IN ${DISTRO_NAME^^}:\nSe ci sono pacchetti nella distro madre che la derivata non deve includere,\nquesta opzione li rimuove.\n\n\
+	*INSTALLARE LA COLLEZIONE DI PROGRAMMI STANDARD:\nStrumenti di base comuni che fungono da base per qualsiasi distro derivata.\n\n\
+	*INSTALLARE LA COLLEZIONE DI PROGRAMMI SPECIFICI:\nProgrammi che definiscono la specializzazione della distro derivata.\nServono per compiti specifici e di solito non sono preinstallati nelle distro generali.\n\n\
+	*INSTALLARE PROGRAMMI STANDARD SINGOLI:\nPermette di selezionare quali programmi installare dal catalogo di componenti Standard.\n\n\
+	*INSTALLARE PROGRAMMI SPECIFICI SINGOLI:\nPermette di selezionare quali programmi installare dal catalogo di\ncomponenti specifici che caratterizzano ${DISTRO_NAME^}.\n\n\
+	*INSTALLAZIONE COMPLETA SENZA RIMUOVERE COMPONENTI:\nInstalla tutti i componenti (standard e specifici) senza rimuovere\nquelli di ${DISTRO_PARENT^} che sono esclusi nella ISO ufficiale di ${DISTRO_NAME^}.\n\n\
+	*INSTALLAZIONE COMPLETA (${DISTRO_NAME^^}):\nGenera una distro ${DISTRO_NAME^} identica alla versione distribuita ufficialmente."
+
+	[de_HELP_TEXT]="Dieses Programm dient dazu, ein Master von ${DISTRO_NAME^} auf ${DISTRO_PARENT^} ${DISTRO_DESKTOP^} zu erstellen,\ndas als abgeleitetes ISO weitergegeben werden kann.\n\n\
+	*PAKETE ENTFERNEN, DIE ${DISTRO_NAME^^} NICHT ENTHÄLT:\nFalls es Pakete in der Mutterdistribution gibt, die in der abgeleiteten Version nicht enthalten sein sollen,\nwird diese Option sie entfernen.\n\n\
+	*INSTALLATION DER STANDARD-PROGRAMMSAMMLUNG:\nGängige grundlegende Werkzeuge, die als Basis für jede abgeleitete Distribution dienen.\n\n\
+	*INSTALLATION DER SPEZIFISCHEN PROGRAMMSAMMLUNG:\nProgramme, die die Spezialisierung der abgeleiteten Distribution definieren.\nSie dienen bestimmten Aufgaben und sind in allgemeinen Distributionen normalerweise nicht vorinstalliert.\n\n\
+	*INSTALLATION EINZELNER STANDARD-PROGRAMME:\nErmöglicht die Auswahl, welche Programme aus dem Standard-Komponentenkatalog installiert werden sollen.\n\n\
+	*INSTALLATION EINZELNER SPEZIFISCHER PROGRAMME:\nErmöglicht die Auswahl, welche Programme aus dem Katalog\nspezifischer Komponenten installiert werden sollen, die ${DISTRO_NAME^} auszeichnen.\n\n\
+	*VOLLSTÄNDIGE INSTALLATION OHNE KOMPONENTEN ZU ENTFERNEN:\nInstalliert alle Komponenten (Standard und spezifisch), entfernt jedoch nicht\ndiejenigen von ${DISTRO_PARENT^}, die in der offiziellen ISO von ${DISTRO_NAME^} ausgeschlossen sind.\n\n\
+	*VOLLSTÄNDIGE INSTALLATION (${DISTRO_NAME^^}):\nErstellt eine ${DISTRO_NAME^}-Distribution, die mit der offiziell vertriebenen Version identisch ist."
+
+	[fr_HELP_TEXT]="Ce programme permet de créer un Master de ${DISTRO_NAME^} sur ${DISTRO_PARENT^} ${DISTRO_DESKTOP^},\nadapté à une redistribution sous forme d'ISO dérivée.\n\n\
+	*SUPPRIMER LES PAQUETS QUE ${DISTRO_NAME^^} N'INCLUT PAS:\nSi la distribution mère contient des paquets qui ne doivent pas être inclus dans la dérivée,\ncette option permet de les supprimer.\n\n\
+	*INSTALLER LA COLLECTION DE PROGRAMMES STANDARDS:\nOutils de base courants servant de fondation à toute distribution dérivée.\n\n\
+	*INSTALLER LA COLLECTION DE PROGRAMMES SPÉCIFIQUES:\nProgrammes définissant la spécialisation de la distribution dérivée.\nIls répondent à des besoins spécifiques et ne sont généralement pas préinstallés dans les distributions généralistes.\n\n\
+	*INSTALLER DES PROGRAMMES STANDARDS INDIVIDUELS:\nPermet de sélectionner les programmes à installer dans le catalogue des composants standards.\n\n\
+	*INSTALLER DES PROGRAMMES SPÉCIFIQUES INDIVIDUELS:\nPermet de sélectionner les programmes à installer dans le catalogue\ndes composants spécifiques caractérisant ${DISTRO_NAME^}.\n\n\
+	*INSTALLATION COMPLÈTE SANS SUPPRESSION DE COMPOSANTS:\nInstalle tous les composants (standards et spécifiques) sans supprimer\nceux de ${DISTRO_PARENT^} qui sont exclus de l'ISO officielle de ${DISTRO_NAME^}.\n\n\
+	*INSTALLATION COMPLÈTE (${DISTRO_NAME^^}):\nGénère une distribution ${DISTRO_NAME^} identique à la version officiellement distribuée."
+
+	[gl_HELP_TEXT]="Este programa serve para crear un Master de ${DISTRO_NAME^} sobre ${DISTRO_PARENT^} ${DISTRO_DESKTOP^},\napto para ser redistribuído como unha ISO derivada.\n\n\
+	*ELIMINAR PAQUETES QUE ${DISTRO_NAME^^} NON INCLÚE:\nSe existen paquetes na distribución nai que a derivada non debe incluír,\nesta opción encárgase de eliminalos.\n\n\
+	*INSTALAR COLECCIÓN DE PROGRAMAS ESTÁNDARES:\nFerramentas básicas habituais que serven como base para toda distribución derivada.\n\n\
+	*INSTALAR COLECCIÓN DE PROGRAMAS ESPECÍFICOS:\nProgramas que configuran a especialización da distribución derivada.\nServen para tarefas concretas e non adoitan vir preinstalados en distribucións de uso xeral.\n\n\
+	*INSTALAR PROGRAMAS ESTÁNDARES SOLTOS:\nPermite seleccionar que programas instalar dentro do catálogo de compoñentes estándar.\n\n\
+	*INSTALAR PROGRAMAS ESPECÍFICOS SOLTOS:\nPermite seleccionar que programas instalar dentro do catálogo de compoñentes\nespecíficos que particularizan a distribución ${DISTRO_NAME^}.\n\n\
+	*INSTALACIÓN COMPLETA SEN ELIMINAR COMPOÑENTES:\nInstala todos os compoñentes (estándar e específicos) aínda que non elimina\naqueles compoñentes de ${DISTRO_PARENT^} que son excluídos na ISO oficial de ${DISTRO_NAME^}.\n\n\
+	*INSTALACIÓN COMPLETA (${DISTRO_NAME^^}):\nXera unha distribución ${DISTRO_NAME^} idéntica á que se distribúe oficialmente."
+
+	[pt_HELP_TEXT]="Este programa serve para criar um Master do ${DISTRO_NAME^} sobre ${DISTRO_PARENT^} ${DISTRO_DESKTOP^},\napto para ser redistribuído como uma ISO derivada.\n\n\
+	*REMOVER PACOTES QUE ${DISTRO_NAME^^} NÃO INCLUI:\nSe existem pacotes na distribuição mãe que a derivada não deve incluir,\nesta opção os removerá.\n\n\
+	*INSTALAR COLEÇÃO DE PROGRAMAS PADRÃO:\nFerramentas básicas comuns que servem como base para qualquer distribuição derivada.\n\n\
+	*INSTALAR COLEÇÃO DE PROGRAMAS ESPECÍFICOS:\nProgramas que definem a especialização da distribuição derivada.\nServem para tarefas específicas e normalmente não vêm pré-instalados em distribuições de uso geral.\n\n\
+	*INSTALAR PROGRAMAS PADRÃO INDIVIDUAIS:\nPermite selecionar quais programas instalar dentro do catálogo de componentes padrão.\n\n\
+	*INSTALAR PROGRAMAS ESPECÍFICOS INDIVIDUAIS:\nPermite selecionar quais programas instalar dentro do catálogo\nde componentes específicos que caracterizam o ${DISTRO_NAME^}.\n\n\
+	*INSTALAÇÃO COMPLETA SEM REMOVER COMPONENTES:\nInstala todos os componentes (padrão e específicos), mas não remove\naqueles de ${DISTRO_PARENT^} que são excluídos na ISO oficial de ${DISTRO_NAME^}.\n\n\
+	*INSTALAÇÃO COMPLETA (${DISTRO_NAME^^}):\nGera uma distribuição ${DISTRO_NAME^} idêntica à versão distribuída oficialmente."
+
+	[es_MAIN_MENU]="MENÚ PRINCIPAL"
+	[en_MAIN_MENU]="MAIN MENU"
+	[it_MAIN_MENU]="MENU PRINCIPALE"
+	[de_MAIN_MENU]="HAUPTMENÜ"
+	[fr_MAIN_MENU]="MENU PRINCIPAL"
+	[gl_MAIN_MENU]="MENÚ PRINCIPAL"
+	[pt_MAIN_MENU]="MENU PRINCIPAL"
+
+	[es_MENU_NAV]="Desplazarse ↑↓ ← →  | <Space> Seleccionar |  <Enter> Confirmar"
+	[en_MENU_NAV]="Navigate ↑↓ ← →  | <Space> Select |  <Enter> Confirm"
+	[it_MENU_NAV]="Navigare ↑↓ ← →  | <Space> Selezionare |  <Enter> Confermare"
+	[de_MENU_NAV]="Navigieren ↑↓ ← →  | <Space> Auswählen |  <Enter> Bestätigen"
+	[fr_MENU_NAV]="Naviguer ↑↓ ← →  | <Space> Sélectionner |  <Enter> Confirmer"
+	[gl_MENU_NAV]="Desprazar ↑↓ ← →  | <Space> Seleccionar |  <Enter> Confirmar"
+	[pt_MENU_NAV]="Navegar ↑↓ ← →  | <Space> Selecionar |  <Enter> Confirmar"
+
+	[es_MENU_NAV_SIMPLE]="Desplazarse: ↑↓ | Confirmar: <Enter>"
+	[en_MENU_NAV_SIMPLE]="Navigate: ↑↓ | Confirm: <Enter>"
+	[it_MENU_NAV_SIMPLE]="Navigare: ↑↓ | Confermare: <Enter>"
+	[de_MENU_NAV_SIMPLE]="Navigieren: ↑↓ | Bestätigen: <Enter>"
+	[fr_MENU_NAV_SIMPLE]="Naviguer: ↑↓ | Confirmer: <Enter>"
+	[gl_MENU_NAV_SIMPLE]="Desprazar: ↑↓ | Confirmar: <Enter>"
+	[pt_MENU_NAV_SIMPLE]="Navegar: ↑↓ | Confirmar: <Enter>"
+
+	[es_MENU_STANDAR_TITLE]="INSTALAR MÓDULOS ESTANDAR DE TODA DISTRO"
+	[en_MENU_STANDAR_TITLE]="INSTALL STANDARD MODULES FOR ALL DISTROS"
+	[it_MENU_STANDAR_TITLE]="INSTALLARE MODULI STANDARD PER TUTTE LE DISTRO"
+	[de_MENU_STANDAR_TITLE]="STANDARDMODULE FÜR ALLE DISTROS INSTALLIEREN"
+	[fr_MENU_STANDAR_TITLE]="INSTALLER LES MODULES STANDARDS POUR TOUTES LES DISTROS"
+	[gl_MENU_STANDAR_TITLE]="INSTALAR MÓDULOS ESTÁNDAR DE TODA DISTRO"
+	[pt_MENU_STANDAR_TITLE]="INSTALAR MÓDULOS PADRÃO PARA TODAS AS DISTROS"
+
+	[es_MENU_SPECIFIC_TITLE]="INSTALAR MÓDULOS ESPECÍFICOS DE"
+	[en_MENU_SPECIFIC_TITLE]="INSTALL SPECIFIC MODULES FOR"
+	[it_MENU_SPECIFIC_TITLE]="INSTALLARE MODULI SPECIFICI DI"
+	[de_MENU_SPECIFIC_TITLE]="SPEZIFISCHE MODULE INSTALLIEREN FÜR"
+	[fr_MENU_SPECIFIC_TITLE]="INSTALLER LES MODULES SPÉCIFIQUES DE"
+	[gl_MENU_SPECIFIC_TITLE]="INSTALAR MÓDULOS ESPECÍFICOS DE"
+	[pt_MENU_SPECIFIC_TITLE]="INSTALAR MÓDULOS ESPECÍFICOS DE"
+
+	[es_OPT_REMOVE]="Remover componentes que"
+	[en_OPT_REMOVE]="Remove components not included in"
+	[it_OPT_REMOVE]="Rimuovere componenti non inclusi in"
+	[de_OPT_REMOVE]="Komponenten entfernen, die nicht enthalten sind in"
+	[fr_OPT_REMOVE]="Supprimer les composants non inclus dans"
+	[gl_OPT_REMOVE]="Eliminar compoñentes que"
+	[pt_OPT_REMOVE]="Remover componentes não incluídos em"
+
+	[es_OPT_STANDAR]="Instalar colección de programas estándar"
+	[en_OPT_STANDAR]="Install standard software collection"
+	[it_OPT_STANDAR]="Installare la collezione di programmi standard"
+	[de_OPT_STANDAR]="Standard-Programmsammlung installieren"
+	[fr_OPT_STANDAR]="Installer la collection de programmes standards"
+	[gl_OPT_STANDAR]="Instalar colección de programas estándar"
+	[pt_OPT_STANDAR]="Instalar coleção de programas padrão"
+
+	[es_OPT_SPECIFIC]="Instalar colección de programas específicos"
+	[en_OPT_SPECIFIC]="Install specific software collection"
+	[it_OPT_SPECIFIC]="Installare la collezione di programmi specifici"
+	[de_OPT_SPECIFIC]="Spezifische Programmsammlung installieren"
+	[fr_OPT_SPECIFIC]="Installer la collection de programmes spécifiques"
+	[gl_OPT_SPECIFIC]="Instalar colección de programas específicos"
+	[pt_OPT_SPECIFIC]="Instalar coleção de programas específicos"
+
+	[es_OPT_STANDAR_LOOSE]="Instalar programas estandar sueltos"
+	[en_OPT_STANDAR_LOOSE]="Install individual standard programs"
+	[it_OPT_STANDAR_LOOSE]="Installare singoli programmi standard"
+	[de_OPT_STANDAR_LOOSE]="Einzelne Standardprogramme installieren"
+	[fr_OPT_STANDAR_LOOSE]="Installer des programmes standards individuels"
+	[gl_OPT_STANDAR_LOOSE]="Instalar programas estándar soltos"
+	[pt_OPT_STANDAR_LOOSE]="Instalar programas padrão individuais"
+
+	[es_OPT_SPECIFIC_LOOSE]="Instalar programas específicos sueltos"
+	[en_OPT_SPECIFIC_LOOSE]="Install individual specific programs"
+	[it_OPT_SPECIFIC_LOOSE]="Installare singoli programmi specifici"
+	[de_OPT_SPECIFIC_LOOSE]="Einzelne spezifische Programme installieren"
+	[fr_OPT_SPECIFIC_LOOSE]="Installer des programmes spécifiques individuels"
+	[gl_OPT_SPECIFIC_LOOSE]="Instalar programas específicos soltos"
+	[pt_OPT_SPECIFIC_LOOSE]="Instalar programas específicos individuais"
+
+	[es_OPT_FULL_NOREMOVE]="Instalación completa sin remover componentes"
+	[en_OPT_FULL_NOREMOVE]="Full installation without removing components"
+	[it_OPT_FULL_NOREMOVE]="Installazione completa senza rimuovere componenti"
+	[de_OPT_FULL_NOREMOVE]="Vollständige Installation ohne Komponenten zu entfernen"
+	[fr_OPT_FULL_NOREMOVE]="Installation complète sans suppression de composants"
+	[gl_OPT_FULL_NOREMOVE]="Instalación completa sen eliminar compoñentes"
+	[pt_OPT_FULL_NOREMOVE]="Instalação completa sem remover componentes"
+
+	[es_OPT_FULL]="Instalación completa"
+	[en_OPT_FULL]="Full installation"
+	[it_OPT_FULL]="Installazione completa"
+	[de_OPT_FULL]="Vollständige Installation"
+	[fr_OPT_FULL]="Installation complète"
+	[gl_OPT_FULL]="Instalación completa"
+	[pt_OPT_FULL]="Instalação completa"
+
+    )
+
+    local idioma=$(echo $LANG | cut -d_ -f1)
+    local mensaje=${msg[${idioma}_$clave]:-${msg[en_$clave]}}
+
+    printf "%s" "$mensaje"
+}

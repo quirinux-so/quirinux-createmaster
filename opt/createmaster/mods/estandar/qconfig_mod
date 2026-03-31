@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# =================================================================
+# File:        qconfig_mod
+# Author:      Charlie Martínez® <cmartinez@quirinux.org>
+# License:     https://www.gnu.org/licenses/gpl-2.0.txt
+# Purpose:     Variable module for package installation
+# Distro:      Quirinux 2.x
+# =================================================================
+
+# Copyright (c) 2019-2025 Charlie Martínez. All Rights Reserved.  
+# License: https://www.gnu.org/licenses/gpl-2.0.txt  
+# Authorized and unauthorized uses of the Quirinux trademark:  
+# See https://www.quirinux.org/aviso-legal  
+#
+
+# This variable module was created for Quirinux 2.0 and contains  
+# necessary information for installing or uninstalling packages through
+# "createmaster" program, which is used to build the master distribution.
+
+#-----------------------------------------------------------------------
+
+# MOD_NAME = Module name.
+# MOD_PACKS = List of packages required by this module, separated by spaces.
+# MOD_MEU =  Menu entry description for this module.
+
+MOD_NAME="qconfig_mod"
+MOD_PACKS="quirinux-config"
+MOD_MENU="Configuraciones específicas para la distro Quirinux"

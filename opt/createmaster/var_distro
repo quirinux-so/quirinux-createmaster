@@ -1,0 +1,68 @@
+#!/bin/bash
+
+# ======================================================================
+# File:          var_distro
+# Path:          /opt/createmaster/
+# Author:        Charlie Martínez® <cmartinez@quirinux.org>
+# License:       https://www.gnu.org/licenses/gpl-2.0.txt
+# Purpose:       Variables to configure createmaster
+# Distribution:  Quirinux 2.x
+# ======================================================================
+
+#
+# Copyright (c) 2019-2025 Charlie Martínez, all rights reserved.
+# Licencia: https://www.gnu.org/licenses/gpl-2.0.txt
+# Authorized and unauthorized uses of the Quirinux trademark:
+# See https://www.quirinux.org/aviso-legal
+#
+
+# Information about var_distro:
+
+# DISTRO_NAME:        Name of the derived distribution.
+# DISTRO_VERSION:     Version number of the derived distribution.
+# DISTRO_RELEASE:     Stability level (e.g.: stable, testing, etc.).
+# DISTRO_PARENT:      Name of the original distribution it is based on.
+# DISTRO_DESKTOP:     Default desktop environment of the distribution.
+
+# DISTRO_PATH:
+# Important: DO NOT modify this variable.
+# It is automatically set based on the distribution name.
+# Make sure there is a user with the same name as your distribution,
+# followed by the suffix "2". Example: if DISTRO_NAME="derived",
+# then there must be a user named "derived2".
+
+# DISTRO_SPLASH:
+# Custom welcome text displayed when starting the "createmaster" program.
+
+# DISTRO_DEPENDS_LOCATION:
+# List of local directories or remote URLs where additional .deb packages
+# required by "createmaster" are stored. These packages are necessary
+# but **are not available in the official repositories of the base distribution**.
+# Example: custom repository configuration packages.
+
+# ----------------------------------------------------------------------
+
+DISTRO_NAME="quirinux"
+DISTRO_VERSION="2.0"
+DISTRO_DATE_RELEASE="09-11-2024"
+DISTRO_RELEASE="estable"
+DISTRO_PARENT="devuan"
+DISTRO_DESKTOP="xfce"
+DISTRO_PATH="/home/${DISTRO_NAME}2" 
+DISTRO_SPLASH="${bold}   ___        _      _                  
+  / _ \ _   _ _ _ __ _ _ __  _   _ _  __
+ | | | | | | | | '__| | '_ \| | | \ \/ /
+ | |_| | |_| | | |  | | | | | |_| |>  < 
+  \__\__\__,_|_|_|  |_|_| |_|\__,_/_/\_\ ${normal}
+ 
+ (p) 2019-2025 Licencia GPLv2, Autor: Charlie Martínez® 
+ Página web: https://www.quirinux.org - E-Mail: cmartinez@quirinux.org
+ Crea Quirinux 2.0 a partir de Devuan 5 (Daedalus)"
+
+DISTRO_DEPENDS_LOCATION=(
+        "https://repo.quirinux.org/pool/main/q/quirinux-keyring/"
+        "https://repo.quirinux.org/pool/main/q/quirinux2-repo/"
+        "https://repo.quirinux.org/pool/main/q/quirinux-repos-adicionales/"
+        "https://repo.quirinux.org/pool/main/e/eggs-quirinux-config/"
+)
+

@@ -1,0 +1,381 @@
+#!/bin/bash
+
+# ======================================================================
+# File:          createmaster
+# Path:          /usr/local/bin/
+# Autor:         Charlie Martínez® <cmartinez@quirinux.org>
+# Licencia:      https://www.gnu.org/licenses/gpl-2.0.txt
+# Propósito:     Crear iso a partir de distro master
+# Distribución:  Quirinux 2.x
+# ======================================================================
+
+#
+# Copyright (c) 2019-2025 Charlie Martínez, derechos reservados.
+# Licencia: https://www.gnu.org/licenses/gpl-2.0.txt
+# Usos autorizados y no autorizados de la marca Quirinux:
+# Ver https://www.quirinux.org/aviso-legal
+#
+
+# About createmaster:
+#
+# This script was created for Quirinux 2.x and is used to customize the
+# packages of a fresh Devuan installation with the goal of converting it
+# into a custom Master distro from which the necessary live ISOs will be
+# generated for redistribution.
+#
+
+# ----------------------------------------------------------------------
+# Variables
+# ----------------------------------------------------------------------
+
+	source "/opt/createmaster/var_distro" # Distribution variables
+	source "/opt/createmaster/lang/lang_createmaster" # Program translations
+	
+    # MODULES THAT WILL MAKE UP THE DISTRO:
+    #
+    # Edit (remove or add) here the modules that will integrate the master
+    # of the distribution.
+    #
+    # These modules must be stored inside /opt/createmaster/mods/category
+    # Example: /opt/createmaster/mods/accesories
+    # 
+    # You can create new modules. Modules are variable files.
+    # Module syntax must be precise:
+    #
+    # Example of a valid module:
+    #
+    # Name: kruler_mod
+    #
+    # Content:
+    #
+    # MOD_NAME="mintinstall_mod"
+    # MOD_PACKS="mintinstall flatpak flatpakconfig"
+    # MOD_MENU="Software Center (Mintinstall)"
+    #
+    
+	ESTANDAR_MODS=("audio_mod" "printers_mod") # Modules for your base distro
+	ESPECIFIC_MODS=("kruler_mod" "galculator_mod" "kdenlive_mod") # Specific modules
+	REMOVE_MODS=("libreoffice_mod") # Will be removed from the current master installation
+	MODS_DIR="/opt/createmaster/mods"
+	
+# ======================================================================
+# Global functions
+# ======================================================================
+
+	source "/opt/createmaster/functions"		
+
+# ======================================================================
+# Local functions
+# ======================================================================
+
+function _copyright() {
+	# Function to generate the backtitle aligned left and right correctly
+    local width=$(tput cols)  # Get the terminal width
+    local left_text="$(_msg INSTALL_OF) ${DISTRO_NAME^^} GNU/LINUX V.${DISTRO_VERSION}"
+    local right_text="CreateMaster®, Copyright (c) 2019-2025 Charlie Martínez GPLv2"
+
+    # Define a safety margin to prevent text from being cut off
+    local safe_width=$((width - 2))  # Subtract 2 for margins
+    local max_left_length=$((safe_width / 2))  # Maximum length for left text
+    local max_right_length=$((safe_width / 2)) # Maximum length for right text
+
+    # Shorten texts if they exceed their allocated space
+    if (( ${#left_text} > max_left_length )); then
+        left_text="${left_text:0:max_left_length-1}…"
+    fi
+    if (( ${#right_text} > max_right_length )); then
+        right_text="${right_text:0:max_right_length-1}…"
+    fi
+
+    # Calculate the padding between the texts
+    local padding=$((safe_width - ${#left_text} - ${#right_text}))
+
+    # If the space is too small, force at least one space
+    if (( padding < 1 )); then
+        padding=1
+    fi
+
+    # Build the line with manual alignment
+    printf "%s%*s%s" "$left_text" "$padding" "" "$right_text"
+}
+
+function _main() {
+clear
+echo " CreateMaster®, Copyright (c) 2019-2025 Charlie Martínez GPLv2"
+echo " -----------------------------------------------------------------------------
+ $(_msg CREATOR) ${DISTRO_NAME^^} $(_msg VERSION) ${DISTRO_VERSION^^}
+ -----------------------------------------------------------------------------"
+echo "${DISTRO_SPLASH}"
+    sleep 1
+    if [ ! -e /opt/createmaster/requirements/ ]; then
+    mkdir -p /opt/createmaster/requirements/
+    fi
+
+	if [ ! -e /opt/createmaster/requirements/ok-depends ]; then    
+		printf "%s\n" "$(_msg WARNING)" 
+
+	fi
+    sleep 0.1
+    echo "
+ 1 $(_msg CONTINUE)
+ 0 $(_msg EXIT)
+"
+    read -p " $(_msg ANSWER) " opc
+    case $opc in
+    "1") # Continue
+        clear      
+        _depends
+        _lang 
+        _menu_main
+        ;;
+    "0") # Exit
+        clear
+        exit 0
+        ;;
+      *) # Error
+        echo "$(_msg ERROR)"
+        sleep 0.1
+        _main    
+        ;;
+    esac
+
+}
+
+function _help() {
+	# Display the main help text
+    local texto_help=$(_msg HELP_TEXT)
+
+    echo -e "$texto_help" > /tmp/ayuda.txt
+
+    dialog --backtitle "$(_copyright)" \
+        --title "$(_msg HELP_TITLE)" \
+        --scrollbar \
+        --textbox /tmp/ayuda.txt 20 100
+}
+
+
+function _standar_msg() {
+	# Show message if all standard programs have already been installed
+    dialog --backtitle "$(_copyright)" \
+        --title "$(_msg CONGRATULATIONS)" \
+        --msgbox "$(_msg ALL_STANDAR)" 23 100
+
+}
+
+function _specific_msg() {
+	# Show message if all specific programs have already been installed
+    dialog --backtitle "$(_copyright)" \
+        --title "$(_msg CONGRATULATIONS)" \
+        --msgbox "$(_msg ALL_SPECIFIC)" 23 100
+
+}
+
+function _complete_msg() {
+	# Show message that all programs have already been installed
+    dialog --backtitle "$(_copyright)" \
+        --title "$(_msg CONGRATULATIONS)" \
+        --msgbox "$(_msg ALL_PROGRAMS)" 23 100
+
+}
+
+function _standar_msg() {
+	# Show message if all standard programs have already been installed
+    dialog --backtitle "$(_copyright)" \
+        --title "$(_msg STANDAR_PROGRAMS)" \
+        --msgbox "$(_msg STANDAR_INSTALL)" 23 100
+
+}
+
+function _specific_msg() {
+	# Function to show message if all specific programs have already been installed
+    dialog --backtitle "$(_copyright)" \
+        --title "$(_msg SPECIFIC_PROGRAMS)" \
+        --msgbox "$(_msg SPECIFIC_INSTALL)s." 23 100
+
+}
+
+function _remove() {
+    clear
+    for mod in "${REMOVE_MODS[@]}"; do
+        mod_path=$(_buscar_mod "$mod")
+        if [[ -n "$mod_path" ]]; then
+            _remove_mod "$mod_path"
+        fi
+    done
+}
+
+function _standar() {
+    clear
+    _update
+    for mod in "${ESTANDAR_MODS[@]}"; do
+        mod_path=$(_buscar_mod "$mod")
+        if [[ -n "$mod_path" ]]; then
+            _install_mod "$mod_path"
+        fi
+    done
+    touch /opt/createmaster/requirements/ok-standar    
+    _standar_msg
+}
+
+function _specific() {
+    clear
+    _update
+    for mod in "${ESPECIFIC_MODS[@]}"; do
+        mod_path=$(_buscar_mod "$mod")
+        if [[ -n "$mod_path" ]]; then
+            _install_mod "$mod_path"
+        fi
+    done
+    touch /opt/createmaster/requirements/ok-specific
+    _specific_msg
+}
+
+function _menu_standar() {
+    clear
+    local options=()
+    for mod in "${ESTANDAR_MODS[@]}"; do
+        mod_path=$(_buscar_mod "$mod")
+        if [[ -n "$mod_path" ]]; then
+            mod_menu=$(grep "MOD_MENU" "$mod_path" | cut -d'=' -f2)
+            options+=("$mod" "$mod_menu" off)
+        fi
+    done
+
+    local selections=$(dialog --title "$(_msg MENU_STANDAR_TITLE)"\
+    --backtitle "$(_copyright)" \
+    --checklist "$(_msg MENU_NAV)" 15 65 10 "\
+    ${options[@]}" 2>&1 >/dev/tty)
+    clear
+    for mod in $selections; do
+        mod_path=$(_buscar_mod "$mod")
+        if [[ -n "$mod_path" ]]; then
+            _install_mod "$mod_path"
+        fi
+    done
+}
+
+function _menu_specific() {
+    clear
+    local options=()
+    for mod in "${ESPECIFIC_MODS[@]}"; do
+        mod_path=$(_buscar_mod "$mod")
+        if [[ -n "$mod_path" ]]; then
+            mod_menu=$(grep "MOD_MENU" "$mod_path" | cut -d'=' -f2)
+            options+=("$mod" "$mod_menu" off)
+        fi
+    done
+
+    local selections=$(dialog --title "$(_msg MENU_SPECIFIC_TITLE) ${DISTRO_NAME^^}" \
+     --backtitle "$(_copyright)" \
+     --checklist "$(_msg MENU_NAV)" 15 65 10 "\
+     ${options[@]}" 2>&1 >/dev/tty)
+    clear
+    for mod in $selections; do
+        mod_path=$(_buscar_mod "$mod")
+        if [[ -n "$mod_path" ]]; then
+            _install_mod "$mod_path"
+        fi
+    done
+}
+
+function _semi_complete() {
+	clear
+	if [ -e /opt/createmaster/requirements/ok-standar ]; then
+		_update
+		_specific
+		_complete_msg
+	else
+		_standar
+		_specific
+		_complete_msg
+	fi
+}
+
+function _complete() {
+	clear
+	_remove
+	_semi_complete
+}
+
+function _menu_main() {
+	# Display the main menu
+	clear
+    opPrincipal=$(dialog --title "$(_msg MAIN_MENU)" --backtitle "$(_copyright)" \
+		--nocancel \
+        --stdout \
+        --menu "$(_msg MENU_NAV_SIMPLE)" 16 65 8 \
+        1 "$(_msg OPT_REMOVE) ${DISTRO_NAME^}" \
+        2 "$(_msg OPT_STANDAR)" \
+        3 "$(_msg OPT_SPECIFIC)" \
+        4 "$(_msg OPT_STANDAR_LOOSE)" \
+        5 "$(_msg OPT_SPECIFIC_LOOSE)" \
+        6 "$(_msg OPT_FULL_NOREMOVE)" \
+        7 "$(_msg OPT_FULL) (${DISTRO_NAME^} Master)" \
+        8 "$(_msg HELP_OPTION)" \
+        9 $(_msg EXIT))
+    echo $opPrincipal
+
+   
+    if [[ "$opPrincipal" == "1" ]]; then # Remove components not included in the derivative
+        clear
+        _remove
+        _menu_main
+    fi
+
+    if [[ "$opPrincipal" == "2" ]]; then # Install standard components for every derivative
+        clear
+        _standar
+        _menu_main
+    fi
+
+    if [[ "$opPrincipal" == "3" ]]; then # Install derivative-specific components
+        clear
+        _specific
+        _menu_main
+    fi
+
+    if [[ "$opPrincipal" == "4" ]]; then # Install individual standard components
+        clear
+        _menu_standar
+        _menu_main
+    fi
+
+    if [[ "$opPrincipal" == "5" ]]; then # Install individual specific components
+        clear
+        _menu_specific
+        _menu_main
+    fi
+    
+    if [[ "$opPrincipal" == "6" ]]; then # Full installation without removing anything
+        clear
+        _semi_complete
+        _menu_main
+    fi
+    if [[ "$opPrincipal" == "7" ]]; then # Full installation (removes unneeded components)
+        clear
+        _complete
+        _menu_main
+    fi    
+    
+    if [[ "$opPrincipal" == "8" ]]; then # Show help
+       clear
+       _help
+       _menu_main       
+    fi
+
+    if [[ "$opPrincipal" == "9" ]]; then # Exit
+        clear
+        _quit
+    fi
+
+}
+
+# ======================================================================
+# Function execution
+# ======================================================================
+
+_lang            # Set language
+_rootcheck       # Ensure root permissions
+_verif_path      # Check if the script is being used on a master distro
+_internet        # Check internet connection
+_main

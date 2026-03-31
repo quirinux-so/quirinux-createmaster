@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# =================================================================
+# File:        utils_mod
+# Author:      Charlie Martínez® <cmartinez@quirinux.org>
+# License:     https://www.gnu.org/licenses/gpl-2.0.txt
+# Purpose:     Variable module for package installation
+# Distro:      Quirinux 2.x
+# =================================================================
+
+# Copyright (c) 2019-2025 Charlie Martínez. All Rights Reserved.  
+# License: https://www.gnu.org/licenses/gpl-2.0.txt  
+# Authorized and unauthorized uses of the Quirinux trademark:  
+# See https://www.quirinux.org/aviso-legal  
+#
+
+# This variable module was created for Quirinux 2.0 and contains  
+# necessary information for installing or uninstalling packages through
+# "createmaster" program, which is used to build the master distribution.
+
+#-----------------------------------------------------------------------
+
+# MOD_NAME = Module name.
+# MOD_PACKS = List of packages required by this module, separated by spaces.
+# MOD_MEU =  Menu entry description for this module.
+
+MOD_NAME="utils_mod"
+MOD_PACKS="acpi-support acpitool apt-transport-https arandr arj cups-bsd cups-pk-helper cpu-x dnsutils dc3dd dialog eject galternatives gnome-system-tools grsync gtkhash gvfs-backends gvfs-fuse gzip hardinfo htop lsof lzip multitail mc mtp-tools ncdu os-prober p7zip packagekit policykit-1 policykit-1-gnome pciutils pinthread printer-driver-cups-pdf pv plank python3-smbc qt5ct sane sane-utils sdparm synapse synaptic system-config-printer system-config-printer-udev sysv-rc-conf tumbler-plugins-extra u3-tool unar unp unrar-free unzip usbutils urfkill vokoscreen-ng vrms weather-util weather-util-data xsane xdg-user-dirs-gtk xscreensaver xscreensaver-data-extra xscreensaver-gl xscreensaver-gl-extra xscreensaver-screensaver-bsod xz-utils zenity zip zsync unace sharutils uudeview mpack cabextract lunzip libusb-0.1-4 libx86-1 wireless-tools powermgmt-base pm-utils laptop-mode-tools iw vbetool ethtool zst zstd zarchive-tools"
+MOD_MENU="Utilidades de sistema"

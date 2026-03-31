@@ -1,0 +1,208 @@
+#!/bin/bash
+
+# ======================================================================
+# File:          functions
+# Path:          /opt/createmaster/
+# Author:        Charlie Martínez® <cmartinez@quirinux.org>
+# License:       https://www.gnu.org/licenses/gpl-2.0.txt
+# Purpose:       Function collection
+# Distribution:  Quirinux 2.x
+# ======================================================================
+
+#
+# Copyright (c) 2019-2025 Charlie Martínez, all rights reserved.
+# Licencia: https://www.gnu.org/licenses/gpl-2.0.txt
+# Authorized and unauthorized uses of the Quirinux trademark:
+# See https://www.quirinux.org/aviso-legal
+#
+
+# ----------------------------------------------------------------------
+# Variables
+# ----------------------------------------------------------------------
+
+	source "/opt/createmaster/var_distro"
+
+# ----------------------------------------------------------------------
+# Global functions
+# ----------------------------------------------------------------------
+
+function _quit() {
+
+	# Function to exit the program
+    
+    clear
+    exit 0
+}
+
+function _rootcheck() {	
+	
+	# Check if the user has administrative privileges
+	
+	if [ "$EUID" -ne 0  ]; then
+		echo ''
+		echo "Este script debe ejecutarse con permisos de root."
+		echo 'Puedes intentarlo con "sudo" tuusuario, "sudo su" o "su root".'
+		echo ''
+		exit 1
+	fi	
+}
+
+function _internet() {
+	
+	# Check if there is an internet connection
+
+	if ! ping -c 1 google.com &> /dev/null; then
+		echo "ERROR: Este programa require conexión a internet."
+		xit 1
+	fi        
+}
+
+function _update() {
+    
+	# Detect package system and update the list
+    
+    if command -v apt-get &>/dev/null; then
+        apt-get update && apt-get upgrade -y
+    elif command -v dnf &>/dev/null; then
+        dnf update -y
+    elif command -v yum &>/dev/null; then
+        yum update -y
+    else
+        echo "No se encontró un gestor de paquetes compatible" >&2
+        exit 1
+    fi    
+}
+
+function _depends() {
+	
+	# Install dependencies
+	
+    TMP_DIR="/tmp/repo"
+    mkdir -p "$TMP_DIR"
+    
+    get_latest_version() {
+        local location=$1
+        
+		# Check whether the packages to download are local or remote
+        
+        if [[ $location =~ ^https?:// ]]; then
+            wget -qO- "$location" | grep -oP "[a-zA-Z0-9._-]+\.(deb|rpm)" | sort -V | tail -n 1
+        else
+            find "$location" -type f \( -name "*.deb" -o -name "*.rpm" \) | sort -V | tail -n 1 | xargs -I{} basename {}
+        fi
+    }
+    
+    if [ ! -e /opt/createmaster/verif/ok-dependencias ]; then
+        _update
+        
+		# Dependencies are defined here
+
+        BASE_PACKAGES=(wget git spice-vdagent dialog)
+        
+		# Install dependency packages using the distro's package manager
+
+        if command -v apt &>/dev/null; then
+            for pkg in "${BASE_PACKAGES[@]}"; do
+                if ! dpkg -l | grep -qw "$pkg"; then
+                    apt install -y "$pkg"
+                fi
+            done
+        elif command -v dnf &>/dev/null; then
+            for pkg in "${BASE_PACKAGES[@]}"; do
+                if ! dnf list installed "$pkg" &>/dev/null; then
+                    dnf install -y "$pkg"
+                fi
+            done
+        elif command -v yum &>/dev/null; then
+            for pkg in "${BASE_PACKAGES[@]}"; do
+                if ! yum list installed "$pkg" &>/dev/null; then
+                    yum install -y "$pkg"
+                fi
+            done
+        else
+            echo "No se encontró un gestor de paquetes compatible" >&2
+            exit 1
+        fi
+        
+		# Install additional dependencies
+		
+        for location in "${DISTRO_DEPENDS_LOCATION[@]}"; do
+            latest_package=$(get_latest_version "$location")
+            
+            if [[ -n "$latest_package" ]]; then
+                if [[ $location =~ ^https?:// ]]; then
+                    wget --no-check-certificate "$location$latest_package" -O "$TMP_DIR/$latest_package"
+                else
+                    cp "$location/$latest_package" "$TMP_DIR/"
+                fi
+                
+				# Install downloaded packages
+				
+                if [[ "$latest_package" == *.deb ]]; then
+                    apt install -y "$TMP_DIR/$latest_package"
+                elif [[ "$latest_package" == *.rpm ]]; then
+                    if command -v dnf &>/dev/null; then
+                        dnf install -y "$TMP_DIR/$latest_package"
+                    elif command -v yum &>/dev/null; then
+                        yum install -y "$TMP_DIR/$latest_package"
+                    fi
+                fi
+            fi
+        done
+        
+		# Create marker file
+		
+        mkdir -p /opt/createmaster/verif/
+        touch /opt/createmaster/verif/ok-dependencias
+    fi
+}
+
+function _lang() {	
+	
+	# Default language
+
+    LANG_PREDET="es_ES.UTF-8" 
+    
+	# Verify language marker
+	
+	if [ ! -e /opt/createmaster/verif/ok-lang ]; then
+		
+	if [ ! -e /usr/share/locale/locale.alias ]; then
+	touch /usr/share/locale/locale.alias
+	fi
+    
+    idiomas=("en_US.UTF-8" "fr_FR.UTF-8" "de_DE.UTF-8" "it_IT.UTF-8" "gl_ES.UTF-8" "pt_PT.UTF-8" "${LANG_PREDET}" )
+
+	# Configure languages
+
+    for idioma in "${idiomas[@]}"; do
+        
+		# Check if the configuration already exists
+        
+        if ! locale -a | grep -q "$idioma"; then
+            sudo locale-gen $idioma
+            echo "Configuración de $idioma completa."
+        fi
+        if [ "$idioma" == "${LANG_PREDET}" ]; then
+            break 
+        fi
+    done
+    
+	# Set the default language
+
+    update-locale LANG="${LANG_PREDET}"
+    
+    touch /opt/createmaster/verif/ok-lang
+    
+    fi
+}
+
+function _verif_path() {
+
+	# Check if the script is being used on a master distro.
+
+    if [ ! -d "$DISTRO_PATH" ]; then
+        echo "ERROR: Comando exclusivo para ser utilizado en ${DISTRO_NAME^} Master."
+        exit 1
+	fi
+}

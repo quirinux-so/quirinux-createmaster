@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# =================================================================
+# File:        network_mod
+# Author:      Charlie Martínez® <cmartinez@quirinux.org>
+# License:     https://www.gnu.org/licenses/gpl-2.0.txt
+# Purpose:     Variable module for package installation
+# Distro:      Quirinux 2.x
+# =================================================================
+
+# Copyright (c) 2019-2025 Charlie Martínez. All Rights Reserved.  
+# License: https://www.gnu.org/licenses/gpl-2.0.txt  
+# Authorized and unauthorized uses of the Quirinux trademark:  
+# See https://www.quirinux.org/aviso-legal  
+#
+
+# This variable module was created for Quirinux 2.0 and contains  
+# necessary information for installing or uninstalling packages through
+# "createmaster" program, which is used to build the master distribution.
+
+#-----------------------------------------------------------------------
+
+# MOD_NAME = Module name.
+# MOD_PACKS = List of packages required by this module, separated by spaces.
+# MOD_MEU =  Menu entry description for this module.
+
+MOD_NAME="network_mod"
+MOD_PACKS="mobile-broadband-provider-info mobile-broadband-provider-info network-manager network-manager-gnome network-manager-openconnect network-manager-openconnect-gnome network-manager-openvpn network-manager-openvpn-gnome network-manager-pptp network-manager-pptp-gnome network-manager-vpnc network-manager-vpnc-gnome network-manager-l2tp network-manager-l2tp-gnome network-manager-ssh network-manager-ssh-gnome network-manager-fortisslvpn network-manager-fortisslvpn-gnome rfkill wavemon wpasupplicant wireless-regdb firmware-ath9k-htc"
+MOD_MENU="Redes y conectividad"

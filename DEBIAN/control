@@ -1,0 +1,12 @@
+Package: quirinux-createmaster
+Version: 0.2.12+q2
+Maintainer: Charlie Martinez <cmartinez@quirinux.org>
+Section: system
+Homepage: https://quirinux.org
+Architecture: amd64
+Priority: optional
+Description: Quirinux cretemaster
+ Author: Charlie Martínez
+ .
+ Creador de distro derivada master.
+Installed-Size: 260

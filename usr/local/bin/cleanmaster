@@ -1,0 +1,156 @@
+#!/bin/bash
+
+# ======================================================================
+# File:       cleanmaster
+# Path:       /usr/local/bin/
+# Author:     Charlie Martínez® <cmartinez@quirinux.org>
+# License:    https://www.gnu.org/licenses/gpl-2.0.txt
+# Purpose:    Free up disk space
+# Supported:  Multi-distro (originally for Quirinux 2.0)
+# ======================================================================
+
+#
+# Copyright (c) 2019-2025 Charlie Martínez, all rights reserved.
+# License: https://www.gnu.org/licenses/gpl-2.0.txt
+# Authorized and unauthorized uses of the Quirinux trademark:
+# See https://www.quirinux.org/aviso-legal
+#
+
+# This script was originally created for Quirinux 2.0 and is used to perform
+# an unattended deep system cleanup to lighten a Linux installation intended
+# to serve as a master for creating a derived live ISO.
+#
+# IMPORTANT:
+# These were designed to save space in live ISO systems by removing 
+# unsupported languages, all program documentation, and all "man" manual
+# pages (if you prefer to disable any function, you can comment it at the 
+# end of this code at "Function Execution" section, "_lang", "_doc" and "_man").
+# Function "lang_" removes unused language files except for specified ones.
+#
+# Copyright (c) 2019-2025 Charlie Martinez. All rights reserved.
+# License: https://www.gnu.org/licenses/gpl-2.0.txt
+# For permitted and unauthorized uses of the Quirinux trademark:
+# Visit https://www.quirinux.org/aviso-legal
+
+# ----------------------------------------------------------------------
+# Global Functions
+# ----------------------------------------------------------------------
+
+	source "/opt/createmaster/lang/lang_cleanmaster" # Translations
+	source "/opt/createmaster/functions"              # Global functions
+
+# ----------------------------------------------------------------------
+# Local Functions
+# ----------------------------------------------------------------------
+
+function _diskspace() {
+    # Get disk space usage before cleanup
+    disk_before=$(df --output=used / | tail -1)
+}
+
+function _package_cleanup() {
+    # Clean package caches (multi-distro support)
+    echo "$(_msg PKG_CLEANUP)"
+    if command -v apt-get &> /dev/null; then
+        apt-get clean
+        apt-get autoclean
+        apt-get autoremove
+        rm -rf /var/lib/apt/lists/*
+    elif command -v dnf &> /dev/null; then
+        dnf clean all
+    elif command -v pacman &> /dev/null; then
+        pacman -Sc --noconfirm
+    elif command -v zypper &> /dev/null; then
+        zypper clean --all
+    else
+        echo "$(_msg PKG_UNSUPPORTED)"
+    fi
+}
+
+function _bash_history() {
+    # Clear Bash history
+    echo "$(_msg BASH_HISTORY)"
+    rm -rf ~/.bash_history
+}
+
+function _deep_cleanup() {
+    # Remove backup files, temporary files, and VIM swap files
+    echo "$(_msg DEEP_CLEANUP)"
+    for user_home in /home/*; do
+        if [[ -d "$user_home" ]]; then
+            find "$user_home" -type f -name "*.bak" -delete
+            find "$user_home" -type f -name "*~" -delete
+            find "$user_home" -type f -name "*.sw[nop]" -delete
+        fi
+    done
+}
+
+function _log_cleanup() {
+    # Delete system log files
+    echo "$(_msg LOG_CLEANUP)"
+    rm -rf /var/log/*.log /var/log/*/*.log /var/log/*/*.gz /var/log/*/*.[0-9]
+    dmesg --clear
+}
+
+function _trash_cleanup() {
+    # Empty user trash folders
+    for user_home in /home/*; do
+        if [[ -d "$user_home" ]]; then
+            rm -rf "$user_home/.cache/*"
+            rm -f "$user_home/.local/share/recently-used.xbel"
+            rm -f "$user_home/.recently-used"
+            rm -rf "$user_home/.local/share/Trash/*"
+        fi
+    done
+    rm -rf /root/.cache/* /root/.local/share/Trash/*
+}
+
+function _lang() {
+    # Remove unused language files except for specified ones
+    echo "$(_msg LANG_CLEANUP)"
+    find /usr/share/locale -mindepth 1 -maxdepth 1 \
+        ! -name "en" ! -name "en_US" ! -name "de" ! -name "de_DE" \
+        ! -name "es" ! -name "es_ES" ! -name "pt" ! -name "pt_PT" \
+        ! -name "fr" ! -name "fr_FR" ! -name "it" ! -name "it_IT" \
+        ! -name "gl" ! -name "gl_ES" -exec rm -rf {} +
+}
+
+function _doc() {
+    # Remove documentation except for Quirinux-specific docs
+    echo "$(_msg DOC_CLEANUP)"
+    find /usr/share/doc -mindepth 1 -not -path "/usr/share/doc/quirinux*" -exec rm -rf {} +
+    rm -rf /usr/share/info/*
+}
+
+function _man() {
+    # Remove all manual pages
+    echo "$(_msg MAN_CLEANUP)"
+    rm -rf /usr/share/man/*
+}
+
+function _diskfree() {
+    # Get disk space usage after cleanup
+    disk_after=$(df --output=used / | tail -1)
+    recovered=$((disk_before - disk_after))
+}
+
+function _completion_message() {
+    # Display final message with recovered space
+    echo "$(_msg DONE) $((recovered / 1024)) $(_msg DONE_MB)"
+}
+
+# ----------------------------------------------------------------------
+# Function Execution
+# ----------------------------------------------------------------------
+_rootcheck            # Ensure root permissions
+_diskspace            # Get initial disk usage
+_package_cleanup      # Clean package caches (multi-distro support)
+_bash_history         # Clear Bash history
+_trash_cleanup        # Empty trash bins
+_log_cleanup          # Delete logs
+_deep_cleanup         # Remove temp and backup files
+_lang                 # Remove unused languages
+_doc                  # Remove documentation
+_man                  # Remove manual pages
+_diskfree             # Get final disk usage
+_completion_message   # Display results

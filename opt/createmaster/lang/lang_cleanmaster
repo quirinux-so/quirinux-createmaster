@@ -1,0 +1,128 @@
+#!/bin/bash
+
+# ======================================================================
+# File:          lang_cleanmaster
+# Path:          /opt/createmaster/lang/
+# Author:        Charlie Martínez® <cmartinez@quirinux.org>
+# License:       https://www.gnu.org/licenses/gpl-2.0.txt
+# Purpose:       cleanmaster translations
+# Distribution:  Quirinux 2.x
+# ======================================================================
+
+#
+# Copyright (c) 2019-2025 Charlie Martínez, all rights reserved.
+# License: https://www.gnu.org/licenses/gpl-2.0.txt
+# Authorized and unauthorized uses of the Quirinux trademark:
+# See https://www.quirinux.org/aviso-legal
+#
+
+function _msg() {
+
+    local clave=$1
+    declare -A msg=(
+
+	# --- Package cleanup messages ---
+
+	[es_PKG_CLEANUP]="Limpiando cachés de paquetes..."
+	[en_PKG_CLEANUP]="Cleaning package caches..."
+	[it_PKG_CLEANUP]="Pulizia della cache dei pacchetti..."
+	[de_PKG_CLEANUP]="Paket-Caches werden bereinigt..."
+	[fr_PKG_CLEANUP]="Nettoyage des caches de paquets..."
+	[gl_PKG_CLEANUP]="Limpando cachés de paquetes..."
+	[pt_PKG_CLEANUP]="Limpando caches de pacotes..."
+
+	[es_PKG_UNSUPPORTED]="Limpieza de gestor de paquetes no compatible con este sistema."
+	[en_PKG_UNSUPPORTED]="Package manager cleanup not supported on this system."
+	[it_PKG_UNSUPPORTED]="La pulizia del gestore pacchetti non è supportata su questo sistema."
+	[de_PKG_UNSUPPORTED]="Die Paketmanager-Bereinigung wird auf diesem System nicht unterstützt."
+	[fr_PKG_UNSUPPORTED]="Le nettoyage du gestionnaire de paquets n'est pas pris en charge sur ce système."
+	[gl_PKG_UNSUPPORTED]="A limpeza do xestor de paquetes non é compatible con este sistema."
+	[pt_PKG_UNSUPPORTED]="A limpeza do gerenciador de pacotes não é compatível com este sistema."
+
+	# --- Bash history messages ---
+
+	[es_BASH_HISTORY]="Borrando historial de Bash..."
+	[en_BASH_HISTORY]="Clearing Bash history..."
+	[it_BASH_HISTORY]="Cancellazione della cronologia di Bash..."
+	[de_BASH_HISTORY]="Bash-Verlauf wird gelöscht..."
+	[fr_BASH_HISTORY]="Suppression de l'historique Bash..."
+	[gl_BASH_HISTORY]="Borrando historial de Bash..."
+	[pt_BASH_HISTORY]="Limpando histórico do Bash..."
+
+	# --- Deep cleanup messages ---
+
+	[es_DEEP_CLEANUP]="Eliminando ficheros de copia de seguridad, temporales y de intercambio de VIM..."
+	[en_DEEP_CLEANUP]="Removing backup, temp, and VIM swap files..."
+	[it_DEEP_CLEANUP]="Rimozione di file di backup, temporanei e di scambio di VIM..."
+	[de_DEEP_CLEANUP]="Sicherungs-, temporäre und VIM-Swap-Dateien werden entfernt..."
+	[fr_DEEP_CLEANUP]="Suppression des fichiers de sauvegarde, temporaires et d'échange VIM..."
+	[gl_DEEP_CLEANUP]="Eliminando ficheiros de copia de seguridade, temporais e de intercambio de VIM..."
+	[pt_DEEP_CLEANUP]="Removendo arquivos de backup, temporários e de troca do VIM..."
+
+	# --- Log cleanup messages ---
+
+	[es_LOG_CLEANUP]="Eliminando ficheros de registro del sistema..."
+	[en_LOG_CLEANUP]="Deleting log files..."
+	[it_LOG_CLEANUP]="Eliminazione dei file di registro..."
+	[de_LOG_CLEANUP]="Protokolldateien werden gelöscht..."
+	[fr_LOG_CLEANUP]="Suppression des fichiers journaux..."
+	[gl_LOG_CLEANUP]="Eliminando ficheiros de rexistro do sistema..."
+	[pt_LOG_CLEANUP]="Excluindo arquivos de registro..."
+
+	# --- Trash cleanup messages (no echo, kept for future use) ---
+
+	# --- Language cleanup messages ---
+
+	[es_LANG_CLEANUP]="Eliminando ficheros de idiomas no utilizados..."
+	[en_LANG_CLEANUP]="Removing unused language files..."
+	[it_LANG_CLEANUP]="Rimozione dei file di lingua non utilizzati..."
+	[de_LANG_CLEANUP]="Nicht verwendete Sprachdateien werden entfernt..."
+	[fr_LANG_CLEANUP]="Suppression des fichiers de langue inutilisés..."
+	[gl_LANG_CLEANUP]="Eliminando ficheiros de idiomas non utilizados..."
+	[pt_LANG_CLEANUP]="Removendo arquivos de idioma não utilizados..."
+
+	# --- Documentation cleanup messages ---
+
+	[es_DOC_CLEANUP]="Eliminando documentación, excepto la de Quirinux..."
+	[en_DOC_CLEANUP]="Removing documentation, except for Quirinux docs..."
+	[it_DOC_CLEANUP]="Rimozione della documentazione, eccetto quella di Quirinux..."
+	[de_DOC_CLEANUP]="Dokumentation wird entfernt, außer Quirinux-Dokumentation..."
+	[fr_DOC_CLEANUP]="Suppression de la documentation, sauf celle de Quirinux..."
+	[gl_DOC_CLEANUP]="Eliminando documentación, agás a de Quirinux..."
+	[pt_DOC_CLEANUP]="Removendo documentação, exceto a do Quirinux..."
+
+	# --- Man pages cleanup messages ---
+
+	[es_MAN_CLEANUP]="Eliminando páginas del manual..."
+	[en_MAN_CLEANUP]="Removing manual pages..."
+	[it_MAN_CLEANUP]="Rimozione delle pagine di manuale..."
+	[de_MAN_CLEANUP]="Handbuchseiten werden entfernt..."
+	[fr_MAN_CLEANUP]="Suppression des pages de manuel..."
+	[gl_MAN_CLEANUP]="Eliminando páxinas do manual..."
+	[pt_MAN_CLEANUP]="Removendo páginas de manual..."
+
+	# --- Completion message ---
+
+	[es_DONE]="Limpieza completada. Se han recuperado"
+	[en_DONE]="Cleanup complete. Recovered"
+	[it_DONE]="Pulizia completata. Recuperati"
+	[de_DONE]="Bereinigung abgeschlossen. Zurückgewonnen:"
+	[fr_DONE]="Nettoyage terminé. Espace récupéré :"
+	[gl_DONE]="Limpeza completada. Recuperáronse"
+	[pt_DONE]="Limpeza concluída. Recuperados"
+
+	[es_DONE_MB]="MB de espacio en disco."
+	[en_DONE_MB]="MB of disk space."
+	[it_DONE_MB]="MB di spazio su disco."
+	[de_DONE_MB]="MB Speicherplatz."
+	[fr_DONE_MB]="Mo d'espace disque."
+	[gl_DONE_MB]="MB de espazo en disco."
+	[pt_DONE_MB]="MB de espaço em disco."
+
+    )
+
+    local idioma=$(echo $LANG | cut -d_ -f1)
+    local mensaje=${msg[${idioma}_$clave]:-${msg[en_$clave]}}
+
+    printf "%s" "$mensaje"
+}

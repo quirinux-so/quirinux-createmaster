@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# =================================================================
+# File:        misc_mod
+# Author:      Charlie Martínez® <cmartinez@quirinux.org>
+# License:     https://www.gnu.org/licenses/gpl-2.0.txt
+# Purpose:     Variable module for package installation
+# Distro:      Quirinux 2.x
+# =================================================================
+
+# Copyright (c) 2019-2025 Charlie Martínez. All Rights Reserved.  
+# License: https://www.gnu.org/licenses/gpl-2.0.txt  
+# Authorized and unauthorized uses of the Quirinux trademark:  
+# See https://www.quirinux.org/aviso-legal  
+#
+
+# This variable module was created for Quirinux 2.0 and contains  
+# necessary information for installing or uninstalling packages through
+# "createmaster" program, which is used to build the master distribution.
+
+#-----------------------------------------------------------------------
+
+# MOD_NAME = Module name.
+# MOD_PACKS = List of packages required by this module, separated by spaces.
+# MOD_MEU =  Menu entry description for this module.
+
+MOD_NAME="misc_mod"
+MOD_PACKS="kdeconnect geoclue-2.0 grsync jami dia gsmartcontrol ophcrack ophcrack-cli whowatch htop zulucrypt-cli zulucrypt-cli balena-etcher-electron keepassxc dino-im dino-im-common etherape eterape-data hexchat hexchat-common hexchat-perl hexchat-plugins hexchat-python3 hexchat-otr iptux qassel qassel-data jami jami-daemon liferea liferea-data mumble wahay onionshare qtox signal hydra hydra-gtk bmon grub-customizer spek osmo eom eom-common compton mc mc-data pidgin pidgin-data bluetooth khmerconverter fcitx* mozc* webcamoid modem-manager-gui fcitx mlterm-common bluez bluez-firmware culmus synapse apparmor pidgin-otr pidgin-encryption pidgin pidgin-data pidgin-themes pidgin-openpgp libpurple0 dino-im dino-im-common gajim gajim-omemo hexchat hexchat-common hexchat-perl hexchat-plugins hexchat-python3 hexchat-otr iptux quassel quassel-data mumble qtox keepassxc mc mc-data osmo kasumi mlterm parole modem-manager-gui modem-manager-gui-help"
+MOD_MENU="Miscelanease"

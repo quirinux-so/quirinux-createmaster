@@ -1,0 +1,144 @@
+#!/bin/bash
+
+# ======================================================================
+# File:          lang_createiso
+# Path:          /opt/createmaster/lang/
+# Author:        Charlie Martínez® <cmartinez@quirinux.org>
+# License:       https://www.gnu.org/licenses/gpl-2.0.txt
+# Purpose:       createiso translations
+# Distribution:  Quirinux 2.x
+# ======================================================================
+
+#
+# Copyright (c) 2019-2025 Charlie Martínez, all rights reserved.
+# License: https://www.gnu.org/licenses/gpl-2.0.txt
+# Authorized and unauthorized uses of the Quirinux trademark:
+# See https://www.quirinux.org/aviso-legal
+#
+
+function _msg() {
+
+    local clave=$1
+    declare -A msg=(
+
+	# --- Test mode messages ---
+
+	[es_TEST_ACTIVATED]=">>> MODO TEST ACTIVADO (no se modificarán archivos ni se creará la ISO)"
+	[en_TEST_ACTIVATED]=">>> TEST MODE ACTIVATED (no files will be modified and no ISO will be created)"
+	[it_TEST_ACTIVATED]=">>> MODALITÀ TEST ATTIVATA (nessun file sarà modificato e nessuna ISO sarà creata)"
+	[de_TEST_ACTIVATED]=">>> TESTMODUS AKTIVIERT (Es werden keine Dateien geändert und keine ISO erstellt)"
+	[fr_TEST_ACTIVATED]=">>> MODE TEST ACTIVÉ (aucun fichier ne sera modifié et aucune ISO ne sera créée)"
+	[gl_TEST_ACTIVATED]=">>> MODO TEST ACTIVADO (non se modificarán ficheiros nin se creará a ISO)"
+	[pt_TEST_ACTIVATED]=">>> MODO DE TESTE ATIVADO (nenhum arquivo será modificado e nenhuma ISO será criada)"
+
+	[es_TEST_END]=">>> FIN DEL TEST: no se modificó ningún archivo"
+	[en_TEST_END]=">>> END OF TEST: no files were modified"
+	[it_TEST_END]=">>> FINE DEL TEST: nessun file è stato modificato"
+	[de_TEST_END]=">>> TESTENDE: Es wurden keine Dateien geändert"
+	[fr_TEST_END]=">>> FIN DU TEST : aucun fichier n'a été modifié"
+	[gl_TEST_END]=">>> FIN DO TEST: non se modificou ningún ficheiro"
+	[pt_TEST_END]=">>> FIM DO TESTE: nenhum arquivo foi modificado"
+
+	[es_TEST_EGGS_YAML]="TEST: eggs.yaml se actualizaría con kernel"
+	[en_TEST_EGGS_YAML]="TEST: eggs.yaml would be updated with kernel"
+	[it_TEST_EGGS_YAML]="TEST: eggs.yaml verrebbe aggiornato con il kernel"
+	[de_TEST_EGGS_YAML]="TEST: eggs.yaml würde mit Kernel aktualisiert werden"
+	[fr_TEST_EGGS_YAML]="TEST : eggs.yaml serait mis à jour avec le noyau"
+	[gl_TEST_EGGS_YAML]="TEST: eggs.yaml actualizaríase co kernel"
+	[pt_TEST_EGGS_YAML]="TEST: eggs.yaml seria atualizado com o kernel"
+
+	[es_TEST_EGGS_PRODUCE]="TEST: se ejecutaría eggs produce"
+	[en_TEST_EGGS_PRODUCE]="TEST: eggs produce would be executed"
+	[it_TEST_EGGS_PRODUCE]="TEST: verrebbe eseguito eggs produce"
+	[de_TEST_EGGS_PRODUCE]="TEST: eggs produce würde ausgeführt werden"
+	[fr_TEST_EGGS_PRODUCE]="TEST : eggs produce serait exécuté"
+	[gl_TEST_EGGS_PRODUCE]="TEST: executaríase eggs produce"
+	[pt_TEST_EGGS_PRODUCE]="TEST: eggs produce seria executado"
+
+	# --- Revision messages ---
+
+	[es_CURRENT_REV]="Número de revisión actual:"
+	[en_CURRENT_REV]="Current revision number:"
+	[it_CURRENT_REV]="Numero di revisione attuale:"
+	[de_CURRENT_REV]="Aktuelle Revisionsnummer:"
+	[fr_CURRENT_REV]="Numéro de révision actuel :"
+	[gl_CURRENT_REV]="Número de revisión actual:"
+	[pt_CURRENT_REV]="Número de revisão atual:"
+
+	[es_KEEP_REV]="¿Mantener este número? [s/n]"
+	[en_KEEP_REV]="Keep this number? [y/n]"
+	[it_KEEP_REV]="Mantenere questo numero? [s/n]"
+	[de_KEEP_REV]="Diese Nummer beibehalten? [j/n]"
+	[fr_KEEP_REV]="Conserver ce numéro ? [o/n]"
+	[gl_KEEP_REV]="Manter este número? [s/n]"
+	[pt_KEEP_REV]="Manter este número? [s/n]"
+
+	[es_NEW_REV]="Introduce el nuevo número de revisión (0 = sin revisión):"
+	[en_NEW_REV]="Enter the new revision number (0 = no revision):"
+	[it_NEW_REV]="Inserire il nuovo numero di revisione (0 = nessuna revisione):"
+	[de_NEW_REV]="Neue Revisionsnummer eingeben (0 = keine Revision):"
+	[fr_NEW_REV]="Entrez le nouveau numéro de révision (0 = sans révision) :"
+	[gl_NEW_REV]="Introduce o novo número de revisión (0 = sen revisión):"
+	[pt_NEW_REV]="Insira o novo número de revisão (0 = sem revisão):"
+
+	# --- Calamares / processing messages ---
+
+	[es_PROCESSING]="Procesando:"
+	[en_PROCESSING]="Processing:"
+	[it_PROCESSING]="Elaborazione:"
+	[de_PROCESSING]="Verarbeitung:"
+	[fr_PROCESSING]="Traitement :"
+	[gl_PROCESSING]="Procesando:"
+	[pt_PROCESSING]="Processando:"
+
+	[es_SIMULATION_START]="---- SIMULACIÓN ----"
+	[en_SIMULATION_START]="---- SIMULATION ----"
+	[it_SIMULATION_START]="---- SIMULAZIONE ----"
+	[de_SIMULATION_START]="---- SIMULATION ----"
+	[fr_SIMULATION_START]="---- SIMULATION ----"
+	[gl_SIMULATION_START]="---- SIMULACIÓN ----"
+	[pt_SIMULATION_START]="---- SIMULAÇÃO ----"
+
+	[es_SIMULATION_END]="--------------------"
+	[en_SIMULATION_END]="--------------------"
+	[it_SIMULATION_END]="--------------------"
+	[de_SIMULATION_END]="--------------------"
+	[fr_SIMULATION_END]="--------------------"
+	[gl_SIMULATION_END]="--------------------"
+	[pt_SIMULATION_END]="--------------------"
+
+	[es_LABEL_VERSION]="Versión:"
+	[en_LABEL_VERSION]="Version:"
+	[it_LABEL_VERSION]="Versione:"
+	[de_LABEL_VERSION]="Version:"
+	[fr_LABEL_VERSION]="Version :"
+	[gl_LABEL_VERSION]="Versión:"
+	[pt_LABEL_VERSION]="Versão:"
+
+	# --- Kernel / eggs.yaml messages ---
+
+	[es_ERR_KERNEL]="Error: No se pudo determinar la versión más reciente del kernel."
+	[en_ERR_KERNEL]="Error: Could not determine the latest kernel version."
+	[it_ERR_KERNEL]="Errore: impossibile determinare la versione più recente del kernel."
+	[de_ERR_KERNEL]="Fehler: Die neueste Kernel-Version konnte nicht ermittelt werden."
+	[fr_ERR_KERNEL]="Erreur : impossible de déterminer la version la plus récente du noyau."
+	[gl_ERR_KERNEL]="Erro: Non se puido determinar a versión máis recente do kernel."
+	[pt_ERR_KERNEL]="Erro: Não foi possível determinar a versão mais recente do kernel."
+
+	# --- Final message ---
+
+	[es_ISO_DONE]="¡ISO creada! Almacenada en el escritorio de"
+	[en_ISO_DONE]="ISO created! Stored on the desktop of"
+	[it_ISO_DONE]="ISO creata! Archiviata sul desktop di"
+	[de_ISO_DONE]="ISO erstellt! Gespeichert auf dem Desktop von"
+	[fr_ISO_DONE]="ISO créée ! Stockée sur le bureau de"
+	[gl_ISO_DONE]="ISO creada! Almacenada no escritorio de"
+	[pt_ISO_DONE]="ISO criada! Armazenada na área de trabalho de"
+
+    )
+
+    local idioma=$(echo $LANG | cut -d_ -f1)
+    local mensaje=${msg[${idioma}_$clave]:-${msg[en_$clave]}}
+
+    printf "%s" "$mensaje"
+}
