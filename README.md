@@ -335,9 +335,7 @@ Below is the sequence a maintainer follows to produce a new release:
         → The script cleans the system, updates Calamares branding,
           runs eggs produce, renames the ISO and generates an MD5.
 
-    (Optional, for maximum compression:)
-
-4.  sudo recomp /path/to/generated.iso
+4.  sudo recomp /path/to/generated.iso # Optional, to modify details and/or achieve maximum compression.
         → The script decompresses, optionally lets you enter a chroot
           to make last-minute fixes, then recompresses with xz + bcj x86.
         → The result is a smaller ISO in the same directory.
