@@ -1,12 +1,17 @@
 Package: quirinux-createmaster
 Version: 0.2.12+q2
-Maintainer: Charlie Martinez <cmartinez@quirinux.org>
-Section: system
-Homepage: https://quirinux.org
 Architecture: amd64
+Section: system
 Priority: optional
-Description: Quirinux cretemaster
- Author: Charlie Martínez
- .
- Creador de distro derivada master.
+Maintainer: Charlie Martinez <cmartinez@quirinux.org>
+Homepage: https://quirinux.org
+Recommends: penguins-eggs, eggs-quirinux-config
 Installed-Size: 260
+Description: Quirinux createmaster - tool for creating a master derived distro
+ Quirinux createmaster is a utility designed to automate the creation
+ of a Quirinux-based master distribution. It provides the necessary
+ scripts and configuration files to generate a customized derivative
+ distro ready for deployment or further customization.
+ .
+ For full functionality, it is recommended to install penguins-eggs
+ and eggs-quirinux-config alongside this package.
